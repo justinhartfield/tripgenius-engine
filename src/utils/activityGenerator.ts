@@ -53,7 +53,7 @@ export const generateDayActivities = (
     activities.push({
       time: 'Afternoon',
       activity: 'Local cuisine experience',
-      interest: 'Food & Drink'
+      interest: 'Food'
     });
   }
   
@@ -70,7 +70,7 @@ export const generateDayActivities = (
     activities.push({
       time: 'Evening',
       activity: 'Dinner at local restaurant',
-      interest: 'Food & Drink'
+      interest: 'Food'
     });
   }
   

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { format } from 'date-fns';
 import { PreviewActivity } from './PreviewActivity';
@@ -28,20 +27,22 @@ const categorizeActivities = (activities: Activity[]) => {
   const evening: Activity[] = [];
 
   activities.forEach(activity => {
-    // First check if the time already includes "Morning", "Afternoon", or "Evening"
-    if (activity.time.toLowerCase().includes('morning')) {
+    const timeStr = activity.time.toLowerCase();
+    
+    // First check if the time explicitly includes time period keywords
+    if (timeStr.includes('morning') || timeStr.includes('breakfast')) {
       morning.push(activity);
       return;
-    } else if (activity.time.toLowerCase().includes('afternoon')) {
+    } else if (timeStr.includes('afternoon') || timeStr.includes('lunch')) {
       afternoon.push(activity);
       return;
-    } else if (activity.time.toLowerCase().includes('evening')) {
+    } else if (timeStr.includes('evening') || timeStr.includes('dinner') || timeStr.includes('night')) {
       evening.push(activity);
       return;
     }
     
     // Otherwise parse the time if possible
-    const hourMatch = activity.time.match(/(\d+)(?::(\d+))?\s*(am|pm)?/i);
+    const hourMatch = timeStr.match(/(\d+)(?::(\d+))?\s*(am|pm)?/i);
     
     if (hourMatch) {
       let hour = parseInt(hourMatch[1]);
@@ -64,17 +65,17 @@ const categorizeActivities = (activities: Activity[]) => {
         evening.push(activity);
       }
     } else {
-      // If the time contains specific keywords, categorize accordingly
-      const timeStr = activity.time.toLowerCase();
-      if (timeStr.includes('breakfast') || timeStr.includes('morning')) {
+      // If the time doesn't contain any recognized format, 
+      // use a heuristic to distribute across the day periods
+      const index = activities.indexOf(activity);
+      const total = activities.length;
+      
+      if (index < total / 3) {
         morning.push(activity);
-      } else if (timeStr.includes('lunch') || timeStr.includes('afternoon')) {
+      } else if (index < (total * 2) / 3) {
         afternoon.push(activity);
-      } else if (timeStr.includes('dinner') || timeStr.includes('evening') || timeStr.includes('night')) {
-        evening.push(activity);
       } else {
-        // Default to morning if we can't determine the time
-        morning.push(activity);
+        evening.push(activity);
       }
     }
   });
@@ -128,16 +129,16 @@ export const PreviewDay: React.FC<PreviewDayProps> = ({
   const monthYear = format(day.date, 'MMMM yyyy');
   const monthShort = format(day.date, 'MMM');
   
-  // Log the activities to help with debugging
-  console.log('Day activities:', day.activities);
+  // Log the raw activities to help with debugging
+  console.log(`Day ${dayIndex + 1} raw activities:`, day.activities);
   
   // Categorize activities by time of day
   const { morning, afternoon, evening } = categorizeActivities(day.activities);
   
   // Log the categorized activities for debugging
-  console.log('Morning activities:', morning);
-  console.log('Afternoon activities:', afternoon);
-  console.log('Evening activities:', evening);
+  console.log(`Day ${dayIndex + 1} morning activities:`, morning);
+  console.log(`Day ${dayIndex + 1} afternoon activities:`, afternoon);
+  console.log(`Day ${dayIndex + 1} evening activities:`, evening);
   
   // Pick a random destination image for activity thumbnails if available
   const getRandomThumbnail = () => {
