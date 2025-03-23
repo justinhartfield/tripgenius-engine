@@ -17,7 +17,28 @@ export const fetchDestinationImage = async (destination: string): Promise<string
     
     if (!response.ok) {
       const data = await response.json();
-      console.error('Google API error:', data);
+      console.error('Google API error details:', data);
+      
+      // Check for specific error types to provide better guidance
+      if (data?.error?.code === 403 && data?.error?.status === 'PERMISSION_DENIED') {
+        if (data?.error?.message?.includes('API has not been used')) {
+          localStorage.setItem('google_api_error', 
+            'The Custom Search API has not been enabled in your Google Cloud project. Go to the Google Cloud Console and enable it.'
+          );
+          throw new Error('The Custom Search API is not enabled in your Google Cloud project');
+        } else if (data?.error?.message?.includes('disabled')) {
+          localStorage.setItem('google_api_error', 
+            'The Custom Search API has been disabled for your project. Go to the Google Cloud Console to enable it.'
+          );
+          throw new Error('The Custom Search API is disabled for your project');
+        } else {
+          localStorage.setItem('google_api_error', 
+            'Google API access denied. Ensure you have enabled the Custom Search API in your Google Cloud Console.'
+          );
+          throw new Error(`API access denied: ${data?.error?.message || 'Unknown permission error'}`);
+        }
+      }
+      
       throw new Error(`Google API error: ${response.status} - ${data?.error?.message || 'Unknown error'}`);
     }
     
