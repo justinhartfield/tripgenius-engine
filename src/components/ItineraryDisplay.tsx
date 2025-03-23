@@ -6,6 +6,7 @@ import { MapDisplay } from './itinerary/MapDisplay';
 import { DestinationGallery } from './itinerary/DestinationGallery';
 import { ItineraryContent } from './itinerary/ItineraryContent';
 import { CalendarExport } from './itinerary/CalendarExport';
+import { format } from 'date-fns';
 
 interface ItineraryDisplayProps {
   itinerary: string | null;
@@ -22,21 +23,54 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({
   
   if (!itinerary) return null;
   
+  // Get main destination (first one) for the title
+  const mainDestination = travelPreferences?.destinations[0]?.name || 'Your Destination';
+  const dateRangeText = travelPreferences?.dateRange.startDate && travelPreferences?.dateRange.endDate
+    ? `${format(travelPreferences.dateRange.startDate, 'MMMM d')} - ${format(travelPreferences.dateRange.endDate, 'MMMM d, yyyy')}`
+    : 'Your Travel Dates';
+  
   return (
     <div className="mt-12 max-w-4xl mx-auto">
       <Card className="overflow-hidden border-0 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-          <CardTitle className="text-center text-2xl font-bold">Your Personalized Travel Itinerary</CardTitle>
+        <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white relative overflow-hidden">
+          <img 
+            src={Object.values(destinationImages)[0] || '/lovable-uploads/02490769-44f8-4ac5-bbd3-d2fb6718dc4e.png'} 
+            alt="Cover" 
+            className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay"
+          />
+          <div className="relative z-10 text-center py-8">
+            <h2 className="text-5xl font-serif mb-2">{mainDestination.toUpperCase()}</h2>
+            <p className="text-xl font-light">{dateRangeText}</p>
+            <div className="mt-4">
+              <h3 className="text-2xl font-serif">Travel Itinerary</h3>
+              <p className="text-sm opacity-80">COMPLETE GUIDE</p>
+            </div>
+          </div>
         </CardHeader>
         
         <MapDisplay travelPreferences={travelPreferences} />
         
         <CardContent className="p-6">
-          <DestinationGallery destinationImages={destinationImages} />
+          <div className="border-b pb-4 mb-6">
+            <h3 className="text-xl font-serif text-center uppercase tracking-wide mb-2">TRIP OVERVIEW</h3>
+            <p className="text-center text-gray-600 text-sm mb-4">
+              Your journey through {travelPreferences?.destinations.map(d => d.name).join(', ')}
+            </p>
+          </div>
+          
+          <DestinationGallery 
+            destinationImages={destinationImages} 
+            destinations={travelPreferences?.destinations.map(d => d.name)}
+          />
+          
+          <div className="border-b pb-4 mb-6">
+            <h3 className="text-xl font-serif text-center uppercase tracking-wide mb-2">DAILY SCHEDULE</h3>
+          </div>
+          
           <ItineraryContent itinerary={itinerary} contentRef={contentRef} />
         </CardContent>
         
-        <CardFooter>
+        <CardFooter className="border-t pt-4 bg-gray-50">
           <CalendarExport 
             travelPreferences={travelPreferences} 
             itinerary={itinerary} 

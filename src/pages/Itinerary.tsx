@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ItineraryDisplay } from '@/components/ItineraryDisplay';
 import { TravelPreferences } from '@/types';
 import { GeneratedItineraryContent } from '@/utils/itineraryUtils';
-import { fetchDestinationImage } from '@/utils/openaiApi';
+import { fetchDestinationImage } from '@/utils/googleImageSearch';
 import { Link } from 'react-router-dom';
 
 const ItineraryPage: React.FC = () => {
@@ -116,40 +116,18 @@ const ItineraryPage: React.FC = () => {
         </Button>
       </div>
 
-      <div className="text-center mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold mb-3">{itineraryData.title}</h1>
-        <p className="text-gray-600 max-w-2xl mx-auto">{itineraryData.description}</p>
-      </div>
-
       {isLoading ? (
         <div className="flex justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <span className="ml-2">Loading destination images...</span>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          {preferences.destinations.map(destination => (
-            <div key={destination.id} className="aspect-video relative rounded-lg overflow-hidden shadow-md">
-              <img 
-                src={destinationImages[destination.name] || 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07'} 
-                alt={destination.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-30 flex items-end">
-                <div className="p-3 text-white font-medium">
-                  {destination.name}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <ItineraryDisplay 
+          itinerary={itineraryData.content} 
+          travelPreferences={preferences}
+          destinationImages={destinationImages}
+        />
       )}
-
-      <ItineraryDisplay 
-        itinerary={itineraryData.content} 
-        travelPreferences={preferences}
-        destinationImages={destinationImages}
-      />
     </div>
   );
 };
