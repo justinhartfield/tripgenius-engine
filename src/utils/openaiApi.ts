@@ -1,7 +1,12 @@
 
 import { TravelPreferences } from '@/types';
+import { GeneratedItineraryContent } from './itineraryUtils';
 
-export const fetchItinerary = async (apiKey: string, preferences: TravelPreferences) => {
+export const fetchItinerary = async (
+  apiKey: string, 
+  preferences: TravelPreferences,
+  includeSeoContent: boolean = false
+): Promise<string | GeneratedItineraryContent> => {
   try {
     // Check if API key is provided
     if (!apiKey) {
@@ -25,7 +30,7 @@ export const fetchItinerary = async (apiKey: string, preferences: TravelPreferen
     const budgetInfo = `${preferences.budget.min}-${preferences.budget.max} ${preferences.budget.currency}`;
 
     // Construct the prompt
-    const prompt = `
+    let prompt = `
     Create a detailed travel itinerary with the following preferences:
     
     Destinations: ${destinationNames || 'Not specified'}
@@ -34,10 +39,26 @@ export const fetchItinerary = async (apiKey: string, preferences: TravelPreferen
     Interests: ${selectedInterests.length > 0 ? selectedInterests.join(', ') : 'Not specified'}
     Accommodation Types: ${selectedAccommodations.length > 0 ? selectedAccommodations.join(', ') : 'Not specified'}
     Transportation Types: ${selectedTransportations.length > 0 ? selectedTransportations.join(', ') : 'Not specified'}
-    
-    Please provide a day-by-day itinerary with activities, recommended places to visit, dining suggestions, and travel/logistics tips.
-    Format the response in markdown with clear sections for each day.
     `;
+
+    if (includeSeoContent) {
+      prompt += `
+      Please provide your response in JSON format with the following structure:
+      {
+        "title": "An engaging, SEO-friendly title for this trip (max 60 characters)",
+        "description": "A compelling meta description summarizing the trip (max 160 characters)",
+        "content": "The detailed day-by-day itinerary formatted in markdown with clear sections for each day"
+      }
+      
+      The title should be catchy and include destination names. The description should highlight key attractions or experiences.
+      For the content, provide a day-by-day itinerary with activities, recommended places to visit, dining suggestions, and travel/logistics tips.
+      `;
+    } else {
+      prompt += `
+      Please provide a day-by-day itinerary with activities, recommended places to visit, dining suggestions, and travel/logistics tips.
+      Format the response in markdown with clear sections for each day.
+      `;
+    }
 
     // Call OpenAI API
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -69,7 +90,20 @@ export const fetchItinerary = async (apiKey: string, preferences: TravelPreferen
     }
 
     const data = await response.json();
-    return data.choices[0].message.content;
+    const content = data.choices[0].message.content;
+
+    if (includeSeoContent) {
+      try {
+        // Try to parse JSON response
+        return JSON.parse(content);
+      } catch (e) {
+        // If parsing fails, return the content as a string
+        console.warn('Failed to parse JSON response from OpenAI, using plain text instead');
+        return content;
+      }
+    }
+    
+    return content;
   } catch (error) {
     console.error('Error fetching itinerary:', error);
     throw error;
@@ -84,4 +118,14 @@ export const getStoredApiKey = (): string => {
 // Function to store API key
 export const storeApiKey = (apiKey: string): void => {
   localStorage.setItem('openai_api_key', apiKey);
+};
+
+// Function to fetch images for a destination
+export const fetchDestinationImage = async (destination: string): Promise<string> => {
+  // For now, we'll use a placeholder image service until we integrate with a real API
+  const encodedDestination = encodeURIComponent(destination);
+  
+  // This would normally hit a proper API, but for demo we'll return a placeholder
+  // In a real app, this would be replaced with Google Places API or similar
+  return `https://source.unsplash.com/featured/?${encodedDestination},travel,landmark`;
 };

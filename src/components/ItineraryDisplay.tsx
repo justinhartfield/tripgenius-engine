@@ -9,11 +9,13 @@ import { TravelPreferences } from '@/types';
 interface ItineraryDisplayProps {
   itinerary: string | null;
   travelPreferences?: TravelPreferences;
+  destinationImages?: Record<string, string>;
 }
 
 export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ 
   itinerary, 
-  travelPreferences 
+  travelPreferences,
+  destinationImages = {}
 }) => {
   const [mapUrl, setMapUrl] = useState<string | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -121,11 +123,22 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({
           h1 { color: #2563eb; }
           h2 { color: #4b5563; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; }
           .container { max-width: 800px; margin: 0 auto; }
+          .destination-image { width: 100%; max-width: 300px; height: auto; margin-bottom: 20px; }
         </style>
       </head>
       <body>
         <div class="container">
           <h1>Your Travel Itinerary</h1>
+          ${Object.entries(destinationImages).length > 0 ? 
+            `<div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+              ${Object.entries(destinationImages).map(([name, url]) => 
+                `<div>
+                  <img src="${url}" alt="${name}" class="destination-image" />
+                  <p>${name}</p>
+                </div>`
+              ).join('')}
+            </div>` : ''
+          }
           ${contentRef.current?.innerHTML || itinerary.replace(/\n/g, '<br />')}
         </div>
       </body>
@@ -137,6 +150,28 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({
     setTimeout(() => {
       printWindow.print();
     }, 250);
+  };
+  
+  // Create a gallery of destination images
+  const renderDestinationGallery = () => {
+    if (Object.keys(destinationImages).length === 0) return null;
+    
+    return (
+      <div className="flex overflow-x-auto gap-4 pb-4 mb-6">
+        {Object.entries(destinationImages).map(([name, url]) => (
+          <div key={name} className="flex-shrink-0 w-48 relative">
+            <img 
+              src={url} 
+              alt={name} 
+              className="w-full h-32 object-cover rounded-lg shadow-md"
+            />
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 rounded-b-lg">
+              <p className="text-white text-sm font-medium truncate">{name}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   };
   
   return (
@@ -160,6 +195,8 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({
         )}
         
         <CardContent className="p-6">
+          {renderDestinationGallery()}
+          
           <div 
             ref={contentRef}
             className="prose prose-sm md:prose-base lg:prose-lg mx-auto bg-white rounded-lg markdown-content" 

@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { StepIndicator } from '@/components/ui/StepIndicator';
 import { DestinationStep } from '@/components/FormSteps/DestinationStep';
 import { DateStep } from '@/components/FormSteps/DateStep';
@@ -9,12 +10,11 @@ import { AccommodationStep } from '@/components/FormSteps/AccommodationStep';
 import { TransportationStep } from '@/components/FormSteps/TransportationStep';
 import { ReviewStep } from '@/components/FormSteps/ReviewStep';
 import { ItineraryPreview } from '@/components/ItineraryPreview';
-import { ItineraryDisplay } from '@/components/ItineraryDisplay';
 import { FormNavigation } from '@/components/FormSteps/FormNavigation';
 import { TravelPreferences, Destination, DateRange, Interest, BudgetRange, AccommodationType, TransportationType } from '@/types';
 import { useToast } from '@/components/ui/use-toast';
 import { getStoredApiKey } from '@/utils/openaiApi';
-import { generateItinerary, validateStep } from '@/utils/itineraryUtils';
+import { generateItinerary, validateStep, GeneratedItineraryContent } from '@/utils/itineraryUtils';
 
 const STEPS = [
   'Destination',
@@ -28,9 +28,10 @@ const STEPS = [
 
 export const TravelForm: React.FC = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedItinerary, setGeneratedItinerary] = useState<string | null>(null);
+  const [generatedItinerary, setGeneratedItinerary] = useState<GeneratedItineraryContent | null>(null);
   const [openaiApiKey, setOpenaiApiKey] = useState(getStoredApiKey());
   
   const [travelPreferences, setTravelPreferences] = useState<TravelPreferences>({
@@ -127,9 +128,19 @@ export const TravelForm: React.FC = () => {
       travelPreferences,
       openaiApiKey,
       () => setIsGenerating(true),
-      (result) => {
+      (result, preferences) => {
         setGeneratedItinerary(result);
         setIsGenerating(false);
+        
+        // Navigate to the itinerary page if we have a result
+        if (result) {
+          navigate(`/itinerary/${result.slug}`, {
+            state: {
+              itineraryData: result,
+              preferences
+            }
+          });
+        }
       }
     );
   };
@@ -214,8 +225,6 @@ export const TravelForm: React.FC = () => {
         onNextStep={nextStep}
         onGenerate={handleGenerateItinerary}
       />
-
-      <ItineraryDisplay itinerary={generatedItinerary} />
       
       {!generatedItinerary && (
         <ItineraryPreview preferences={travelPreferences} />
