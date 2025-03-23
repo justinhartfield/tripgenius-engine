@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { format } from 'date-fns';
 import { PreviewActivity } from './PreviewActivity';
@@ -78,6 +79,41 @@ const categorizeActivities = (activities: Activity[]) => {
     }
   });
 
+  // Sort activities within each category by time if possible
+  const sortByTime = (a: Activity, b: Activity) => {
+    const aMatch = a.time.match(/(\d+)(?::(\d+))?\s*(am|pm)?/i);
+    const bMatch = b.time.match(/(\d+)(?::(\d+))?\s*(am|pm)?/i);
+    
+    if (aMatch && bMatch) {
+      let aHour = parseInt(aMatch[1]);
+      let bHour = parseInt(bMatch[1]);
+      
+      const aAmPm = aMatch[3]?.toLowerCase();
+      const bAmPm = bMatch[3]?.toLowerCase();
+      
+      // Convert to 24-hour format for comparison
+      if (aAmPm === 'pm' && aHour < 12) aHour += 12;
+      if (aAmPm === 'am' && aHour === 12) aHour = 0;
+      if (bAmPm === 'pm' && bHour < 12) bHour += 12;
+      if (bAmPm === 'am' && bHour === 12) bHour = 0;
+      
+      if (aHour !== bHour) {
+        return aHour - bHour;
+      }
+      
+      // Compare minutes if hours are the same
+      const aMinute = aMatch[2] ? parseInt(aMatch[2]) : 0;
+      const bMinute = bMatch[2] ? parseInt(bMatch[2]) : 0;
+      return aMinute - bMinute;
+    }
+    
+    return 0;
+  };
+  
+  morning.sort(sortByTime);
+  afternoon.sort(sortByTime);
+  evening.sort(sortByTime);
+
   return { morning, afternoon, evening };
 };
 
@@ -92,8 +128,16 @@ export const PreviewDay: React.FC<PreviewDayProps> = ({
   const monthYear = format(day.date, 'MMMM yyyy');
   const monthShort = format(day.date, 'MMM');
   
+  // Log the activities to help with debugging
+  console.log('Day activities:', day.activities);
+  
   // Categorize activities by time of day
   const { morning, afternoon, evening } = categorizeActivities(day.activities);
+  
+  // Log the categorized activities for debugging
+  console.log('Morning activities:', morning);
+  console.log('Afternoon activities:', afternoon);
+  console.log('Evening activities:', evening);
   
   // Pick a random destination image for activity thumbnails if available
   const getRandomThumbnail = () => {
