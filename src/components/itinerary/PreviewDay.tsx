@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { format } from 'date-fns';
 import { PreviewActivity } from './PreviewActivity';
@@ -28,6 +27,19 @@ const categorizeActivities = (activities: Activity[]) => {
   const evening: Activity[] = [];
 
   activities.forEach(activity => {
+    // First check if the time already includes "Morning", "Afternoon", or "Evening"
+    if (activity.time.toLowerCase().includes('morning')) {
+      morning.push(activity);
+      return;
+    } else if (activity.time.toLowerCase().includes('afternoon')) {
+      afternoon.push(activity);
+      return;
+    } else if (activity.time.toLowerCase().includes('evening')) {
+      evening.push(activity);
+      return;
+    }
+    
+    // Otherwise parse the time if possible
     const hourMatch = activity.time.match(/(\d+)(?::(\d+))?\s*(am|pm)?/i);
     
     if (hourMatch) {
@@ -51,8 +63,18 @@ const categorizeActivities = (activities: Activity[]) => {
         evening.push(activity);
       }
     } else {
-      // If time format can't be parsed, default to morning
-      morning.push(activity);
+      // If the time contains specific keywords, categorize accordingly
+      const timeStr = activity.time.toLowerCase();
+      if (timeStr.includes('breakfast') || timeStr.includes('morning')) {
+        morning.push(activity);
+      } else if (timeStr.includes('lunch') || timeStr.includes('afternoon')) {
+        afternoon.push(activity);
+      } else if (timeStr.includes('dinner') || timeStr.includes('evening') || timeStr.includes('night')) {
+        evening.push(activity);
+      } else {
+        // Default to morning if we can't determine the time
+        morning.push(activity);
+      }
     }
   });
 

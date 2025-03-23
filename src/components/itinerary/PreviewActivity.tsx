@@ -62,6 +62,16 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
 
   // Get color based on time of day - morning: orange, afternoon: green, evening: purple
   const getTimeOfDayColor = () => {
+    // Check for time of day keywords first
+    const timeStr = time.toLowerCase();
+    if (timeStr.includes('morning') || timeStr.includes('breakfast')) {
+      return 'bg-orange-100 border-orange-200';
+    } else if (timeStr.includes('afternoon') || timeStr.includes('lunch')) {
+      return 'bg-green-100 border-green-200';
+    } else if (timeStr.includes('evening') || timeStr.includes('dinner') || timeStr.includes('night')) {
+      return 'bg-purple-100 border-purple-200';
+    }
+    
     // Parse the time string to determine if it's morning, afternoon, or evening
     const hourMatch = time.match(/(\d+)(?::(\d+))?\s*(am|pm)?/i);
     
@@ -147,6 +157,16 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
 
   // Get time of day label for the activity
   const getTimeOfDayLabel = () => {
+    // Check for time of day keywords first
+    const timeStr = time.toLowerCase();
+    if (timeStr.includes('morning') || timeStr.includes('breakfast')) {
+      return "Morning";
+    } else if (timeStr.includes('afternoon') || timeStr.includes('lunch')) {
+      return "Afternoon";
+    } else if (timeStr.includes('evening') || timeStr.includes('dinner') || timeStr.includes('night')) {
+      return "Evening";
+    }
+    
     const hourMatch = time.match(/(\d+)(?::(\d+))?\s*(am|pm)?/i);
     
     if (hourMatch) {
@@ -166,6 +186,7 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
       }
     }
     
+    // Default to empty string if we can't determine
     return "";
   };
 
