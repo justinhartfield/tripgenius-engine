@@ -3,6 +3,7 @@ import React, { useRef } from 'react';
 import { HeroSection } from '@/components/HeroSection';
 import { TravelForm } from '@/components/TravelForm';
 import { ExampleItineraries } from '@/components/ExampleItineraries';
+import { ExampleItinerarySelector } from '@/components/ExampleItinerarySelector';
 import { TravelPreferencesProvider } from '@/contexts/TravelPreferencesContext';
 
 const Index = () => {
@@ -18,6 +19,9 @@ const Index = () => {
       
       <TravelPreferencesProvider>
         <ExampleItineraries />
+        
+        {/* New Example Itinerary Selector Component */}
+        <ExampleItinerarySelector />
         
         <div ref={formRef} className="py-12">
           <TravelForm />
