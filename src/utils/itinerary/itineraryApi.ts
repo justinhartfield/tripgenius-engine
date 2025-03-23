@@ -54,6 +54,9 @@ export const generateItinerary = async (
         }
       : { ...itineraryData, slug };
     
+    // Save the itinerary to localStorage for browsing
+    saveItineraryToLocalStorage(result, preferences);
+    
     onFinishGenerating(result, preferences);
     toast({
       title: "Your itinerary is ready!",
@@ -67,6 +70,39 @@ export const generateItinerary = async (
       variant: "destructive",
     });
     onFinishGenerating(null, preferences);
+  }
+};
+
+// Save itinerary to localStorage for browsing later
+const saveItineraryToLocalStorage = (
+  itineraryData: GeneratedItineraryContent, 
+  preferences: TravelPreferences
+) => {
+  try {
+    // Get existing plans or initialize new array
+    const existingPlansJson = localStorage.getItem('travel_plans');
+    const existingPlans = existingPlansJson ? JSON.parse(existingPlansJson) : [];
+    
+    // Create new plan object
+    const newPlan = {
+      slug: itineraryData.slug,
+      itineraryData,
+      preferences,
+      createdAt: Date.now()
+    };
+    
+    // Add new plan to array (or replace if same slug exists)
+    const planIndex = existingPlans.findIndex((plan: any) => plan.slug === itineraryData.slug);
+    if (planIndex >= 0) {
+      existingPlans[planIndex] = newPlan;
+    } else {
+      existingPlans.push(newPlan);
+    }
+    
+    // Save back to localStorage
+    localStorage.setItem('travel_plans', JSON.stringify(existingPlans));
+  } catch (error) {
+    console.error('Error saving itinerary to localStorage:', error);
   }
 };
 
