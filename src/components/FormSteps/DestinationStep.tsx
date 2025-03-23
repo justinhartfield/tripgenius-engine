@@ -60,7 +60,6 @@ export const DestinationStep: React.FC<DestinationStepProps> = ({
               }
             }}
             className="flex-1"
-            placeholder="Add a destination..."
           />
           <Button 
             onClick={handleAddDestination}

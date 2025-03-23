@@ -1,40 +1,142 @@
-
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { fetchItinerary } from '@/utils/openaiApi';
-import { ItineraryHeader } from '@/components/itinerary/ItineraryHeader';
-import { ItinerarySection } from '@/components/itinerary/ItinerarySection';
-import { ItineraryContent } from '@/components/itinerary/ItineraryContent';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
+import { ItineraryDisplay } from '@/components/ItineraryDisplay';
 import { TravelPreferences } from '@/types';
-import { useToast } from "@/hooks/use-toast";
-import { Copy, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
-import { generateShareableLink } from '@/utils/linkGenerator';
-import { saveItinerary } from '@/utils/supabase';
-import { parseItineraryDays } from '@/utils/itinerary';
-
-interface LocationState {
-  itineraryData?: any;
-  preferences?: TravelPreferences;
-}
+import { GeneratedItineraryContent } from '@/utils/itinerary';
+import { fetchDestinationImage } from '@/utils/googleImageSearch';
+import { ItineraryHeader } from '@/components/itinerary/ItineraryHeader';
+import { ItineraryLoading } from '@/components/itinerary/ItineraryLoading';
+import { ConfigurationWarning } from '@/components/itinerary/ConfigurationWarning';
+import { ItineraryNotFound } from '@/components/itinerary/ItineraryNotFound';
+import { NavigationHeader } from '@/components/NavigationHeader';
+import { toast } from '@/components/ui/use-toast';
 
 const ItineraryPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
   const location = useLocation();
-  const { toast } = useToast();
-  const [itineraryData, setItineraryData] = useState<any>(location.state?.itineraryData || null);
-  const [loading, setLoading] = useState(false);
-  const [copySuccess, setCopySuccess] = useState(false);
-  const [googleApiKey, setGoogleApiKey] = useState(localStorage.getItem('google_api_key') || '');
-  const [searchEngineId, setSearchEngineId] = useState(localStorage.getItem('google_search_engine_id') || '');
-  const [preferences, setPreferences] = useState<TravelPreferences | null>(location.state?.preferences || null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+  const [destinationImages, setDestinationImages] = useState<Record<string, string>>({});
+  const [googleApiKey, setGoogleApiKey] = useState('');
+  const [searchEngineId, setSearchEngineId] = useState('');
+  const [configurationNeeded, setConfigurationNeeded] = useState(false);
+  const [itineraryData, setItineraryData] = useState<GeneratedItineraryContent | null>(null);
+  const [preferences, setPreferences] = useState<TravelPreferences | null>(null);
   
-  // Save API keys to localStorage
+  useEffect(() => {
+    if (location.state?.itineraryData && location.state?.preferences) {
+      setItineraryData(location.state.itineraryData);
+      setPreferences(location.state.preferences);
+      
+      try {
+        const storedPlansJson = localStorage.getItem('travel_plans');
+        const storedPlans = storedPlansJson ? JSON.parse(storedPlansJson) : [];
+        
+        const newPlan = {
+          slug: location.state.itineraryData.slug,
+          itineraryData: location.state.itineraryData,
+          preferences: location.state.preferences,
+          createdAt: Date.now()
+        };
+        
+        const planIndex = storedPlans.findIndex((p: any) => p.slug === newPlan.slug);
+        if (planIndex >= 0) {
+          storedPlans[planIndex] = newPlan;
+        } else {
+          storedPlans.push(newPlan);
+        }
+        
+        localStorage.setItem('travel_plans', JSON.stringify(storedPlans));
+        toast({
+          title: "Plan saved",
+          description: "Your travel plan has been saved and can be accessed from the Browse Plans page.",
+        });
+      } catch (err) {
+        console.error("Error saving plan to localStorage:", err);
+      }
+    } else if (slug) {
+      try {
+        const storedPlansJson = localStorage.getItem('travel_plans');
+        if (storedPlansJson) {
+          const storedPlans = JSON.parse(storedPlansJson);
+          const plan = storedPlans.find((p: any) => p.slug === slug);
+          
+          if (plan) {
+            setItineraryData(plan.itineraryData);
+            setPreferences(plan.preferences);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading plan from localStorage:', error);
+      }
+    }
+  }, [slug, location.state]);
+
+  useEffect(() => {
+    const storedGoogleApiKey = localStorage.getItem('google_api_key') || '';
+    const storedSearchEngineId = localStorage.getItem('google_search_engine_id') || '';
+    setGoogleApiKey(storedGoogleApiKey);
+    setSearchEngineId(storedSearchEngineId);
+    setConfigurationNeeded(!storedGoogleApiKey || !storedSearchEngineId);
+  }, []);
+
+  useEffect(() => {
+    const loadImages = async () => {
+      if (!preferences?.destinations.length) {
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      
+      try {
+        if (googleApiKey && searchEngineId) {
+          const imagePromises = preferences.destinations.map(async destination => {
+            try {
+              const imageUrl = await fetchDestinationImage(destination.name);
+              return { name: destination.name, url: imageUrl };
+            } catch (error) {
+              console.error(`Error fetching image for ${destination.name}:`, error);
+              
+              if (error instanceof Error && error.message.includes('Custom Search API is not enabled')) {
+                localStorage.setItem('google_api_error', 
+                  'The Google Custom Search API is not enabled for your project. Please visit the Google Cloud Console ' +
+                  'to enable it for your API key.'
+                );
+              }
+              
+              return { name: destination.name, url: '/lovable-uploads/8c54c5e6-ad02-464b-86cb-e4ec87739e80.png' };
+            }
+          });
+
+          const images = await Promise.all(imagePromises);
+          const imageMap = images.reduce((acc, { name, url }) => {
+            if (url) acc[name] = url;
+            return acc;
+          }, {} as Record<string, string>);
+
+          setDestinationImages(imageMap);
+        } else {
+          setDestinationImages({});
+          setConfigurationNeeded(true);
+        }
+      } catch (error) {
+        console.error('Error loading images:', error);
+        setDestinationImages({});
+        setConfigurationNeeded(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (preferences) {
+      loadImages();
+    } else {
+      setIsLoading(false);
+    }
+  }, [preferences, googleApiKey, searchEngineId]);
+
   const saveApiKeys = () => {
     if (googleApiKey) {
       localStorage.setItem('google_api_key', googleApiKey);
@@ -42,185 +144,76 @@ const ItineraryPage: React.FC = () => {
     if (searchEngineId) {
       localStorage.setItem('google_search_engine_id', searchEngineId);
     }
-    toast({
-      title: "API Keys Saved",
-      description: "Your API keys have been successfully saved.",
-    });
+    
+    localStorage.removeItem('google_api_error');
+    
+    window.location.reload();
   };
 
-  useEffect(() => {
-    const fetchItineraryData = async () => {
-      if (slug) {
-        setLoading(true);
-        try {
-          const storedApiKey = localStorage.getItem('openai_api_key');
-          if (!storedApiKey) {
-            toast({
-              title: "API Key Required",
-              description: "Please set your OpenAI API key in the settings before generating an itinerary.",
-              variant: "destructive"
-            });
-            return;
-          }
-          
-          // Create a complete fallback TravelPreferences object with all required properties
-          const defaultPreferences: TravelPreferences = {
-            destinations: [],
-            dateRange: { startDate: null, endDate: null },
-            budget: { min: 0, max: 0, currency: 'USD' },
-            interests: [],
-            accommodationTypes: [],
-            transportationTypes: [],
-            mood: [],
-            tripTypes: [],
-            ageRange: 'all',
-            familyOptions: {
-              hasPool: false,
-              hasConnectedBeds: false,
-              hasPlayground: false,
-              isChildFriendly: false
-            },
-            personalPreferences: '',
-            tourGuidePreference: 'rick-steves'
-          };
-          
-          const data = await fetchItinerary(storedApiKey, preferences || defaultPreferences, false);
-          setItineraryData(data);
-        } catch (error: any) {
-          console.error("Failed to fetch itinerary:", error);
-          toast({
-            title: "Error fetching itinerary",
-            description: error.message || "Failed to load itinerary. Please try again.",
-            variant: "destructive",
-          });
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    if (!itineraryData && slug) {
-      fetchItineraryData();
-    }
-  }, [slug, preferences, toast, itineraryData]);
+  if (!itineraryData || !preferences) {
+    return <ItineraryNotFound />;
+  }
 
   const handleShare = async () => {
-    if (!itineraryData) {
-      toast({
-        title: "Itinerary Not Available",
-        description: "Please wait for the itinerary to load before sharing.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     try {
-      const idToShare = itineraryData.id || slug || 'default-id';
-      const shareableLink = await generateShareableLink(idToShare);
-      
-      if (shareableLink) {
-        navigator.clipboard.writeText(shareableLink);
-        setCopySuccess(true);
-        toast({
-          title: "Link Copied",
-          description: "The shareable link has been copied to your clipboard.",
+      if (navigator.share) {
+        await navigator.share({
+          title: itineraryData.title,
+          text: itineraryData.description,
+          url: window.location.href,
         });
-        setTimeout(() => setCopySuccess(false), 3000);
       } else {
-        throw new Error("Failed to generate shareable link.");
+        navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
       }
-    } catch (error: any) {
-      console.error("Error generating shareable link:", error);
-      toast({
-        title: "Share Failed",
-        description: error.message || "Failed to generate shareable link. Please try again.",
-        variant: "destructive"
-      });
+    } catch (error) {
+      console.error('Error sharing itinerary:', error);
     }
   };
 
-  const handleBrowsePlans = () => {
+  const navigateToPlans = () => {
     navigate('/plans');
   };
 
-  const handleCopyText = () => {
-    if (itineraryData) {
-      const content = typeof itineraryData === 'string' 
-        ? itineraryData 
-        : itineraryData.content || JSON.stringify(itineraryData);
-      
-      navigator.clipboard.writeText(content);
-      toast({
-        title: "Copied to Clipboard",
-        description: "Itinerary text has been copied to your clipboard.",
-      });
-    }
-  };
-
-  const getItineraryContent = () => {
-    if (typeof itineraryData === 'string') {
-      return itineraryData;
-    } else if (itineraryData?.content) {
-      return itineraryData.content;
-    } else if (itineraryData?.sections && Array.isArray(itineraryData.sections)) {
-      return itineraryData.sections.map((s: any) => s.content).join('\n\n');
-    }
-    return '';
-  };
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      <ItineraryHeader 
-        googleApiKey={googleApiKey}
-        searchEngineId={searchEngineId}
-        setGoogleApiKey={setGoogleApiKey}
-        setSearchEngineId={setSearchEngineId}
-        saveApiKeys={saveApiKeys}
-        handleShare={handleShare}
-        onBrowsePlans={handleBrowsePlans}
-        itineraryContent={getItineraryContent()}
-        onCopyText={handleCopyText}
-      />
-      
-      {loading ? (
-        <div className="flex items-center justify-center p-12">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-lg font-medium">Loading your itinerary...</p>
-          </div>
-        </div>
-      ) : itineraryData ? (
-        <div className="bg-white/95 backdrop-blur-sm shadow-lg rounded-xl border overflow-hidden">
-          {itineraryData.sections && itineraryData.sections.length > 0 ? (
-            <ScrollArea className="h-[700px] w-full p-6">
-              <div className="space-y-6" ref={contentRef}>
-                {itineraryData.sections.map((section: any, index: number) => (
-                  <ItinerarySection key={index} section={section} />
-                ))}
-              </div>
-            </ScrollArea>
-          ) : (
-            <ScrollArea className="h-[700px] w-full">
-              <ItineraryContent 
-                itinerary={getItineraryContent()}
-                contentRef={contentRef}
-                travelPreferences={preferences}
-              />
-            </ScrollArea>
+    <>
+      <NavigationHeader />
+      <div className="container mx-auto py-12 px-4">
+        <Helmet>
+          <title>{itineraryData.title}</title>
+          <meta name="description" content={itineraryData.description} />
+          <meta property="og:title" content={itineraryData.title} />
+          <meta property="og:description" content={itineraryData.description} />
+          {Object.values(destinationImages)[0] && (
+            <meta property="og:image" content={Object.values(destinationImages)[0]} />
           )}
-        </div>
-      ) : (
-        <div className="text-center p-12 bg-white/80 rounded-xl shadow-md">
-          <p className="text-lg text-gray-600">No itinerary data found. Please generate an itinerary first.</p>
-          <Button 
-            className="mt-4" 
-            onClick={() => navigate('/')}
-          >
-            Create New Itinerary
-          </Button>
-        </div>
-      )}
-    </div>
+        </Helmet>
+
+        <ItineraryHeader 
+          googleApiKey={googleApiKey}
+          searchEngineId={searchEngineId}
+          setGoogleApiKey={setGoogleApiKey}
+          setSearchEngineId={setSearchEngineId}
+          saveApiKeys={saveApiKeys}
+          handleShare={handleShare}
+          onBrowsePlans={navigateToPlans}
+          itineraryContent={itineraryData.content}
+        />
+
+        {isLoading ? (
+          <ItineraryLoading />
+        ) : (
+          <>
+            {configurationNeeded && <ConfigurationWarning />}
+            <ItineraryDisplay 
+              itinerary={itineraryData.content} 
+              travelPreferences={preferences}
+              destinationImages={destinationImages}
+            />
+          </>
+        )}
+      </div>
+    </>
   );
 };
 

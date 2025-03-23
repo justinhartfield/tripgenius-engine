@@ -1,3 +1,4 @@
+
 import { TravelPreferences } from '@/types';
 import { GeneratedItineraryContent } from '@/utils/itinerary';
 import { slugify } from '@/utils/stringUtils';
@@ -173,16 +174,12 @@ export const fetchItinerary = async (
   }
 };
 
-/**
- * Get stored OpenAI API key from localStorage
- */
+// Function to check if a stored API key exists
 export const getStoredApiKey = (): string => {
   return localStorage.getItem('openai_api_key') || '';
 };
 
-/**
- * Store OpenAI API key in localStorage
- */
+// Function to store API key
 export const storeApiKey = (apiKey: string): void => {
   localStorage.setItem('openai_api_key', apiKey);
 };
