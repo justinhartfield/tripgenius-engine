@@ -4,7 +4,7 @@ import { AnimatedCard } from '@/components/ui/AnimatedCard';
 import { Interest } from '@/types';
 import { cn } from '@/lib/utils';
 import { 
-  Map, Utensils, Museum, Mountain, Brush, Waves, 
+  Map, Utensils, Building, Mountain, Brush, Waves, 
   Ticket, Camera, Wine, Book, Music, Users 
 } from 'lucide-react';
 
@@ -32,7 +32,7 @@ export const InterestsStep: React.FC<InterestsStepProps> = ({
     switch (iconName) {
       case 'Map': return <Map {...props} />;
       case 'Utensils': return <Utensils {...props} />;
-      case 'Museum': return <Museum {...props} />;
+      case 'Museum': return <Building {...props} />; // Changed from Museum to Building
       case 'Mountain': return <Mountain {...props} />;
       case 'Brush': return <Brush {...props} />;
       case 'Waves': return <Waves {...props} />;

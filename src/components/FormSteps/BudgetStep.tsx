@@ -9,7 +9,7 @@ import {
   EuroIcon,
   CircleDollarSign,
   PoundSterling,
-  YenIcon
+  Yen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -23,7 +23,7 @@ const currencyOptions = [
   { symbol: 'USD', icon: DollarSign },
   { symbol: 'EUR', icon: EuroIcon },
   { symbol: 'GBP', icon: PoundSterling },
-  { symbol: 'JPY', icon: YenIcon },
+  { symbol: 'JPY', icon: Yen },
 ];
 
 export const BudgetStep: React.FC<BudgetStepProps> = ({
