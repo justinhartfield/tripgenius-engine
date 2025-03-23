@@ -52,7 +52,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </Button>
         </div>
         
-        <div className="Create a styled grid container with dynamic column count and spacing:\n- Use Tailwind CSS for styling\n- Use Grid component from shadcn/ui\n- Props: columns, max-width (number, default 4)\n- On small screens (max-width 640px): 1 column, full width\n- On medium screens (max-width 1024px): 2 columns\n- On larger screens: 4 columns\n- Use gap-4 for spacing and mt-16 for top margin\n- Set maximum width to 3xl on larger screens\n- Accept max-width and width props for customization">
+        <div className="remove\n">
           {[{
           icon: MapPin,
           title: 'Destinations',
