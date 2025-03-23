@@ -13,7 +13,7 @@ export const ItineraryContent: React.FC<ItineraryContentProps> = ({
   contentRef
 }) => {
   // Function to convert markdown to HTML with enhanced formatting
-  const formatItineraryContent = (content: string) => {
+  const formatItineraryContent = (content: string): string => {
     // Clean up any raw JSON that might have been returned
     let cleanContent = content;
     if (content.includes('"title":') && content.includes('"description":') && content.includes('"content":')) {
