@@ -60,17 +60,29 @@ const ItineraryPage: React.FC = () => {
             });
             return;
           }
-          // Fixed the function call to match the expected number of arguments
-          const data = await fetchItinerary(storedApiKey, preferences || {
+          
+          // Create a complete fallback TravelPreferences object with all required properties
+          const defaultPreferences: TravelPreferences = {
             destinations: [],
             dateRange: { startDate: null, endDate: null },
             budget: { min: 0, max: 0, currency: 'USD' },
             interests: [],
             accommodationTypes: [],
             transportationTypes: [],
-            tourGuidePreference: 'rick-steves',
-            personalPreferences: ''
-          }, false);
+            mood: [],
+            tripTypes: [],
+            ageRange: 'all',
+            familyOptions: {
+              hasPool: false,
+              hasConnectedBeds: false,
+              hasPlayground: false,
+              isChildFriendly: false
+            },
+            personalPreferences: '',
+            tourGuidePreference: 'rick-steves'
+          };
+          
+          const data = await fetchItinerary(storedApiKey, preferences || defaultPreferences, false);
           setItineraryData(data);
         } catch (error: any) {
           console.error("Failed to fetch itinerary:", error);
