@@ -6,6 +6,7 @@ import { CalendarClock } from 'lucide-react';
 import { TravelPreferences } from '@/types';
 import { parseItineraryDays } from '@/utils/itinerary';
 import { PreviewDay } from './PreviewDay';
+import { TourGuideDescription } from './TourGuideDescription';
 
 interface ItineraryContentProps {
   itinerary: string;
@@ -61,6 +62,9 @@ export const ItineraryContent: React.FC<ItineraryContentProps> = ({
   if (parsedDays.length > 0) {
     return (
       <div ref={contentRef} className="space-y-8 py-6">
+        {/* Add Tour Guide Description */}
+        <TourGuideDescription travelPreferences={travelPreferences} />
+        
         <div className="flex items-center justify-center gap-3 mb-8">
           <CalendarClock className="h-7 w-7 text-primary" />
           <h2 className="text-2xl md:text-3xl font-semibold text-center">Your Day-by-Day Itinerary</h2>
@@ -80,12 +84,16 @@ export const ItineraryContent: React.FC<ItineraryContentProps> = ({
 
   // Fallback to the standard markdown rendering if parsing fails
   return (
-    <div 
-      ref={contentRef}
-      className="prose prose-sm md:prose-base lg:prose-lg mx-auto bg-white rounded-lg markdown-content" 
-      dangerouslySetInnerHTML={{ 
-        __html: formatItineraryContent(itinerary)
-      }} 
-    />
+    <div ref={contentRef} className="space-y-8 py-6">
+      {/* Add Tour Guide Description */}
+      <TourGuideDescription travelPreferences={travelPreferences} />
+      
+      <div 
+        className="prose prose-sm md:prose-base lg:prose-lg mx-auto bg-white rounded-lg markdown-content" 
+        dangerouslySetInnerHTML={{ 
+          __html: formatItineraryContent(itinerary)
+        }} 
+      />
+    </div>
   );
 };
