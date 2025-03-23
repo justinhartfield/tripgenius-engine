@@ -60,30 +60,53 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
     }
   };
 
+  // Get color based on time of day - morning: orange, afternoon: green, evening: purple
+  const getTimeOfDayColor = () => {
+    // Parse the time string to determine if it's morning, afternoon, or evening
+    const hourMatch = time.match(/(\d+)(?::(\d+))?\s*(am|pm)?/i);
+    
+    if (hourMatch) {
+      let hour = parseInt(hourMatch[1]);
+      const ampm = hourMatch[3]?.toLowerCase();
+      
+      // Convert to 24-hour format for comparison
+      if (ampm === 'pm' && hour < 12) hour += 12;
+      if (ampm === 'am' && hour === 12) hour = 0;
+      
+      // Morning: 5am - 11:59am (orange)
+      if (hour >= 5 && hour < 12) {
+        return 'bg-orange-100 border-orange-200';
+      }
+      // Afternoon: 12pm - 5:59pm (green)
+      else if (hour >= 12 && hour < 18) {
+        return 'bg-green-100 border-green-200';
+      }
+      // Evening: 6pm - 4:59am (purple)
+      else {
+        return 'bg-purple-100 border-purple-200';
+      }
+    }
+    
+    // Default color if time format is not recognized
+    return 'bg-gray-100 border-gray-200';
+  };
+
   // Get color based on activity type with better contrast
   const getBubbleColor = () => {
-    switch (interest.toLowerCase()) {
-      case 'food': return 'bg-orange-200 border-orange-300 text-orange-950';
-      case 'sightseeing': return 'bg-blue-200 border-blue-300 text-blue-950';
-      case 'adventure': return 'bg-green-200 border-green-300 text-green-950';
-      case 'culture': return 'bg-purple-200 border-purple-300 text-purple-950';
-      case 'relaxation': return 'bg-teal-200 border-teal-300 text-teal-950';
-      case 'shopping': return 'bg-pink-200 border-pink-300 text-pink-950';
-      case 'nightlife': return 'bg-indigo-200 border-indigo-300 text-indigo-950';
-      default: return 'bg-gray-200 border-gray-300 text-gray-950';
-    }
+    // Time-based color takes precedence over interest-based color
+    return getTimeOfDayColor();
   };
 
   const getTagColor = () => {
     switch (interest.toLowerCase()) {
-      case 'food': return 'bg-orange-500/20 text-orange-200';
-      case 'sightseeing': return 'bg-blue-500/20 text-blue-200';
-      case 'adventure': return 'bg-green-500/20 text-green-200';
-      case 'culture': return 'bg-purple-500/20 text-purple-200';
-      case 'relaxation': return 'bg-teal-500/20 text-teal-200';
-      case 'shopping': return 'bg-pink-500/20 text-pink-200';
-      case 'nightlife': return 'bg-indigo-500/20 text-indigo-200';
-      default: return 'bg-primary/20 text-primary-foreground';
+      case 'food': return 'bg-orange-500/20 text-orange-700';
+      case 'sightseeing': return 'bg-blue-500/20 text-blue-700';
+      case 'adventure': return 'bg-green-500/20 text-green-700';
+      case 'culture': return 'bg-purple-500/20 text-purple-700';
+      case 'relaxation': return 'bg-teal-500/20 text-teal-700';
+      case 'shopping': return 'bg-pink-500/20 text-pink-700';
+      case 'nightlife': return 'bg-indigo-500/20 text-indigo-700';
+      default: return 'bg-primary/20 text-primary';
     }
   };
 
@@ -122,6 +145,42 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
     }
   };
 
+  // Get time of day label for the activity
+  const getTimeOfDayLabel = () => {
+    const hourMatch = time.match(/(\d+)(?::(\d+))?\s*(am|pm)?/i);
+    
+    if (hourMatch) {
+      let hour = parseInt(hourMatch[1]);
+      const ampm = hourMatch[3]?.toLowerCase();
+      
+      // Convert to 24-hour format for comparison
+      if (ampm === 'pm' && hour < 12) hour += 12;
+      if (ampm === 'am' && hour === 12) hour = 0;
+      
+      if (hour >= 5 && hour < 12) {
+        return "Morning";
+      } else if (hour >= 12 && hour < 18) {
+        return "Afternoon";
+      } else {
+        return "Evening";
+      }
+    }
+    
+    return "";
+  };
+
+  // Get icon color based on time of day
+  const getIconBgColor = () => {
+    const timeOfDay = getTimeOfDayLabel();
+    
+    switch (timeOfDay) {
+      case "Morning": return "bg-orange-200 text-orange-700";
+      case "Afternoon": return "bg-green-200 text-green-700";
+      case "Evening": return "bg-purple-200 text-purple-700";
+      default: return "bg-primary/20 text-primary-foreground";
+    }
+  };
+
   return (
     <div 
       className="animate-fade-in mb-6" 
@@ -130,6 +189,9 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
       <div className="flex items-start gap-3">
         <div className="flex-shrink-0 w-12 text-center">
           <span className="itinerary-time-label">{time}</span>
+          <div className="text-xs font-medium mt-1 rounded-full px-2 py-0.5 text-center bg-opacity-50">
+            {getTimeOfDayLabel()}
+          </div>
         </div>
         
         <Accordion type="single" collapsible className="w-full">
@@ -165,7 +227,7 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
                     <span className={`itinerary-tag ${getTagColor()} mr-2`}>
                       {interest}
                     </span>
-                    <div className="bg-primary/20 text-primary-foreground rounded-full p-1.5">
+                    <div className={`rounded-full p-1.5 ${getIconBgColor()}`}>
                       {getIconComponent()}
                     </div>
                   </div>

@@ -3,7 +3,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import { PreviewActivity } from './PreviewActivity';
 import { getActivityIcon } from '@/utils/previewUtils';
-import { Calendar } from 'lucide-react';
+import { Calendar, Sun, Cloud, Moon } from 'lucide-react';
 
 interface Activity {
   time: string;
@@ -21,6 +21,44 @@ interface PreviewDayProps {
   tourGuideType?: string;
 }
 
+// Helper function to categorize activities by time of day
+const categorizeActivities = (activities: Activity[]) => {
+  const morning: Activity[] = [];
+  const afternoon: Activity[] = [];
+  const evening: Activity[] = [];
+
+  activities.forEach(activity => {
+    const hourMatch = activity.time.match(/(\d+)(?::(\d+))?\s*(am|pm)?/i);
+    
+    if (hourMatch) {
+      let hour = parseInt(hourMatch[1]);
+      const ampm = hourMatch[3]?.toLowerCase();
+      
+      // Convert to 24-hour format for comparison
+      if (ampm === 'pm' && hour < 12) hour += 12;
+      if (ampm === 'am' && hour === 12) hour = 0;
+      
+      // Morning: 5am - 11:59am
+      if (hour >= 5 && hour < 12) {
+        morning.push(activity);
+      }
+      // Afternoon: 12pm - 5:59pm
+      else if (hour >= 12 && hour < 18) {
+        afternoon.push(activity);
+      }
+      // Evening: 6pm - 4:59am
+      else {
+        evening.push(activity);
+      }
+    } else {
+      // If time format can't be parsed, default to morning
+      morning.push(activity);
+    }
+  });
+
+  return { morning, afternoon, evening };
+};
+
 export const PreviewDay: React.FC<PreviewDayProps> = ({ 
   day, 
   dayIndex, 
@@ -31,6 +69,9 @@ export const PreviewDay: React.FC<PreviewDayProps> = ({
   const dayOfWeek = format(day.date, 'EEEE');
   const monthYear = format(day.date, 'MMMM yyyy');
   const monthShort = format(day.date, 'MMM');
+  
+  // Categorize activities by time of day
+  const { morning, afternoon, evening } = categorizeActivities(day.activities);
   
   // Pick a random destination image for activity thumbnails if available
   const getRandomThumbnail = () => {
@@ -63,18 +104,77 @@ export const PreviewDay: React.FC<PreviewDayProps> = ({
       </div>
       
       <div className="border-l-2 border-primary/30 pl-[calc(0.75rem+12px)] ml-8 pt-2">
-        {day.activities.map((activity, actIndex) => (
-          <PreviewActivity
-            key={actIndex}
-            time={activity.time}
-            activity={activity.activity}
-            interest={activity.interest}
-            icon={getActivityIcon(activity.interest)}
-            animationDelay={(dayIndex * 0.1) + (actIndex * 0.05)}
-            thumbnail={getRandomThumbnail()}
-            tourGuideType={tourGuideType}
-          />
-        ))}
+        {/* Morning Activities */}
+        {morning.length > 0 && (
+          <div className="mb-4">
+            <div className="flex items-center mb-2">
+              <Sun className="h-4 w-4 text-orange-500 mr-2" />
+              <h4 className="text-sm font-semibold text-orange-600">MORNING</h4>
+            </div>
+            <div className="pl-2 border-l-2 border-orange-200">
+              {morning.map((activity, actIndex) => (
+                <PreviewActivity
+                  key={`morning-${actIndex}`}
+                  time={activity.time}
+                  activity={activity.activity}
+                  interest={activity.interest}
+                  icon={getActivityIcon(activity.interest)}
+                  animationDelay={(dayIndex * 0.1) + (actIndex * 0.05)}
+                  thumbnail={getRandomThumbnail()}
+                  tourGuideType={tourGuideType}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Afternoon Activities */}
+        {afternoon.length > 0 && (
+          <div className="mb-4">
+            <div className="flex items-center mb-2">
+              <Cloud className="h-4 w-4 text-green-500 mr-2" />
+              <h4 className="text-sm font-semibold text-green-600">AFTERNOON</h4>
+            </div>
+            <div className="pl-2 border-l-2 border-green-200">
+              {afternoon.map((activity, actIndex) => (
+                <PreviewActivity
+                  key={`afternoon-${actIndex}`}
+                  time={activity.time}
+                  activity={activity.activity}
+                  interest={activity.interest}
+                  icon={getActivityIcon(activity.interest)}
+                  animationDelay={(dayIndex * 0.1) + (morning.length * 0.05) + (actIndex * 0.05)}
+                  thumbnail={getRandomThumbnail()}
+                  tourGuideType={tourGuideType}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Evening Activities */}
+        {evening.length > 0 && (
+          <div>
+            <div className="flex items-center mb-2">
+              <Moon className="h-4 w-4 text-purple-500 mr-2" />
+              <h4 className="text-sm font-semibold text-purple-600">EVENING</h4>
+            </div>
+            <div className="pl-2 border-l-2 border-purple-200">
+              {evening.map((activity, actIndex) => (
+                <PreviewActivity
+                  key={`evening-${actIndex}`}
+                  time={activity.time}
+                  activity={activity.activity}
+                  interest={activity.interest}
+                  icon={getActivityIcon(activity.interest)}
+                  animationDelay={(dayIndex * 0.1) + (morning.length * 0.05) + (afternoon.length * 0.05) + (actIndex * 0.05)}
+                  thumbnail={getRandomThumbnail()}
+                  tourGuideType={tourGuideType}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
