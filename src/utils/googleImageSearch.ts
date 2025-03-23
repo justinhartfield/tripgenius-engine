@@ -8,12 +8,11 @@ export const fetchDestinationImage = async (destination: string): Promise<string
     const searchEngineId = localStorage.getItem('google_search_engine_id');
     
     if (!googleApiKey || !searchEngineId) {
-      // Fallback to placeholder or Unsplash
-      return `https://source.unsplash.com/featured/?${encodeURIComponent(destination)},travel,landmark`;
+      throw new Error('Missing API keys');
     }
     
     const response = await fetch(
-      `https://www.googleapis.com/customsearch/v1?key=${googleApiKey}&cx=${searchEngineId}&q=${encodeURIComponent(destination + ' landmark')}&searchType=image&num=1`
+      `https://www.googleapis.com/customsearch/v1?key=${googleApiKey}&cx=${searchEngineId}&q=${encodeURIComponent(destination + ' landmark travel')}&searchType=image&num=1&imgSize=large&safe=active`
     );
     
     if (!response.ok) {
@@ -25,13 +24,12 @@ export const fetchDestinationImage = async (destination: string): Promise<string
     if (data.items && data.items.length > 0) {
       return data.items[0].link;
     } else {
-      // Fallback to Unsplash if no results
-      return `https://source.unsplash.com/featured/?${encodeURIComponent(destination)},travel,landmark`;
+      throw new Error('No image results found');
     }
   } catch (error) {
     console.error('Error fetching destination image:', error);
-    // Fallback to Unsplash on error
-    return `https://source.unsplash.com/featured/?${encodeURIComponent(destination)},travel,landmark`;
+    // Let the calling component handle the fallback
+    throw error;
   }
 };
 
