@@ -72,7 +72,10 @@ export const ExampleItineraries: React.FC = () => {
       endDate.setDate(startDate.getDate() + example.days - 1);
 
       // Set destinations
-      setDestinations(example.destinations.map(name => ({ name })));
+      setDestinations(example.destinations.map(name => ({ 
+        id: name.toLowerCase().replace(/\s/g, '-'),
+        name 
+      })));
       
       // Set date range
       setDateRange({ startDate, endDate });
@@ -86,7 +89,10 @@ export const ExampleItineraries: React.FC = () => {
       // Update preferences with the current values
       const updatedPreferences = {
         ...preferences,
-        destinations: example.destinations.map(name => ({ name })),
+        destinations: example.destinations.map(name => ({ 
+          id: name.toLowerCase().replace(/\s/g, '-'),
+          name 
+        })),
         dateRange: { startDate, endDate },
         interests: preferences.interests.map(interest => ({
           ...interest,

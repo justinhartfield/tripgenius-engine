@@ -3,6 +3,7 @@ import React, { useRef } from 'react';
 import { HeroSection } from '@/components/HeroSection';
 import { TravelForm } from '@/components/TravelForm';
 import { ExampleItineraries } from '@/components/ExampleItineraries';
+import { TravelPreferencesProvider } from '@/contexts/TravelPreferencesContext';
 
 const Index = () => {
   const formRef = useRef<HTMLDivElement>(null);
@@ -15,11 +16,13 @@ const Index = () => {
     <div className="min-h-screen">
       <HeroSection onGetStarted={scrollToForm} />
       
-      <ExampleItineraries />
-      
-      <div ref={formRef} className="py-12">
-        <TravelForm />
-      </div>
+      <TravelPreferencesProvider>
+        <ExampleItineraries />
+        
+        <div ref={formRef} className="py-12">
+          <TravelForm />
+        </div>
+      </TravelPreferencesProvider>
 
       {/* How It Works Section */}
       <section className="py-16 bg-gradient-to-b from-background to-black/80">

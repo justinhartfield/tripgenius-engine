@@ -4,10 +4,10 @@ import { StepIndicator } from '@/components/ui/StepIndicator';
 import { ItineraryPreview } from '@/components/ItineraryPreview';
 import { FormNavigation } from '@/components/FormSteps/FormNavigation';
 import { FormContent } from '@/components/travel-form/FormContent';
-import { TravelPreferencesProvider, useTravelPreferences } from '@/contexts/TravelPreferencesContext';
+import { useTravelPreferences } from '@/contexts/TravelPreferencesContext';
 import { useFormNavigation, STEPS } from '@/hooks/useFormNavigation';
 
-const TravelFormContent: React.FC = () => {
+export const TravelForm: React.FC = () => {
   const { preferences, openaiApiKey } = useTravelPreferences();
   
   const {
@@ -50,13 +50,5 @@ const TravelFormContent: React.FC = () => {
         <ItineraryPreview preferences={preferences} />
       )}
     </section>
-  );
-};
-
-export const TravelForm: React.FC = () => {
-  return (
-    <TravelPreferencesProvider>
-      <TravelFormContent />
-    </TravelPreferencesProvider>
   );
 };
