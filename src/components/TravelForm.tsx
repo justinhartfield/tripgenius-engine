@@ -1,6 +1,6 @@
+
 import React, { useState } from 'react';
 import { StepIndicator } from '@/components/ui/StepIndicator';
-import { Button } from '@/components/ui/button';
 import { DestinationStep } from '@/components/FormSteps/DestinationStep';
 import { DateStep } from '@/components/FormSteps/DateStep';
 import { InterestsStep } from '@/components/FormSteps/InterestsStep';
@@ -9,10 +9,12 @@ import { AccommodationStep } from '@/components/FormSteps/AccommodationStep';
 import { TransportationStep } from '@/components/FormSteps/TransportationStep';
 import { ReviewStep } from '@/components/FormSteps/ReviewStep';
 import { ItineraryPreview } from '@/components/ItineraryPreview';
+import { ItineraryDisplay } from '@/components/ItineraryDisplay';
+import { FormNavigation } from '@/components/FormSteps/FormNavigation';
 import { TravelPreferences, Destination, DateRange, Interest, BudgetRange, AccommodationType, TransportationType } from '@/types';
-import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { fetchItinerary, getStoredApiKey } from '@/utils/openaiApi';
+import { getStoredApiKey } from '@/utils/openaiApi';
+import { generateItinerary, validateStep } from '@/utils/itineraryUtils';
 
 const STEPS = [
   'Destination',
@@ -71,6 +73,7 @@ export const TravelForm: React.FC = () => {
     ]
   });
 
+  // Preference setter functions
   const setDestinations = (destinations: Destination[]) => {
     setTravelPreferences(prev => ({ ...prev, destinations }));
   };
@@ -95,22 +98,9 @@ export const TravelForm: React.FC = () => {
     setTravelPreferences(prev => ({ ...prev, transportationTypes }));
   };
 
+  // Navigation functions
   const nextStep = () => {
-    if (currentStep === 0 && travelPreferences.destinations.length === 0) {
-      toast({
-        title: "Please add at least one destination",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (currentStep === 1 && (!travelPreferences.dateRange.startDate || !travelPreferences.dateRange.endDate)) {
-      toast({
-        title: "Please select both start and end dates",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!validateStep(currentStep, travelPreferences, toast)) return;
 
     if (currentStep < STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
@@ -133,40 +123,18 @@ export const TravelForm: React.FC = () => {
   };
 
   const handleGenerateItinerary = async () => {
-    if (!openaiApiKey) {
-      toast({
-        title: "OpenAI API Key Required",
-        description: "Please set your OpenAI API key first.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsGenerating(true);
-    toast({
-      title: "Generating your personalized itinerary",
-      description: "Your perfect trip plan is being created. This might take a moment.",
-    });
-    
-    try {
-      const itinerary = await fetchItinerary(openaiApiKey, travelPreferences);
-      setGeneratedItinerary(itinerary);
-      toast({
-        title: "Your itinerary is ready!",
-        description: "Scroll down to view your personalized travel plan.",
-      });
-    } catch (error) {
-      console.error('Error generating itinerary:', error);
-      toast({
-        title: "Error generating itinerary",
-        description: error instanceof Error ? error.message : "Please check your API key and try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGenerating(false);
-    }
+    await generateItinerary(
+      travelPreferences,
+      openaiApiKey,
+      () => setIsGenerating(true),
+      (result) => {
+        setGeneratedItinerary(result);
+        setIsGenerating(false);
+      }
+    );
   };
 
+  // Render current step content
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
@@ -237,51 +205,19 @@ export const TravelForm: React.FC = () => {
         {renderStepContent()}
       </div>
 
-      <div className="flex justify-between mt-8 max-w-md mx-auto">
-        <Button
-          variant="outline"
-          onClick={prevStep}
-          disabled={currentStep === 0 || isGenerating}
-          className="transition-all duration-300"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
-        </Button>
+      <FormNavigation
+        currentStep={currentStep}
+        totalSteps={STEPS.length}
+        isGenerating={isGenerating}
+        hasApiKey={!!openaiApiKey}
+        onPrevStep={prevStep}
+        onNextStep={nextStep}
+        onGenerate={handleGenerateItinerary}
+      />
 
-        {currentStep < STEPS.length - 1 ? (
-          <Button onClick={nextStep} disabled={isGenerating}>
-            Next
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        ) : (
-          <Button 
-            onClick={handleGenerateItinerary} 
-            className="bg-primary hover:bg-primary/90"
-            disabled={isGenerating || !openaiApiKey}
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                Generate Itinerary
-                <Check className="ml-2 h-4 w-4" />
-              </>
-            )}
-          </Button>
-        )}
-      </div>
-
-      {generatedItinerary ? (
-        <div className="mt-12 max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-8">Your Personalized Travel Itinerary</h2>
-          <div className="prose prose-sm md:prose-base lg:prose-lg mx-auto bg-white rounded-lg shadow-md p-6 markdown-content">
-            <div dangerouslySetInnerHTML={{ __html: generatedItinerary.replace(/\n/g, '<br />') }} />
-          </div>
-        </div>
-      ) : (
+      <ItineraryDisplay itinerary={generatedItinerary} />
+      
+      {!generatedItinerary && (
         <ItineraryPreview preferences={travelPreferences} />
       )}
     </section>

@@ -32,7 +32,7 @@ export const InterestsStep: React.FC<InterestsStepProps> = ({
     switch (iconName) {
       case 'Map': return <Map {...props} />;
       case 'Utensils': return <Utensils {...props} />;
-      case 'Museum': return <Building {...props} />; // Changed from Museum to Building
+      case 'Museum': return <Building {...props} />; // Using Building icon for Museum
       case 'Mountain': return <Mountain {...props} />;
       case 'Brush': return <Brush {...props} />;
       case 'Waves': return <Waves {...props} />;
