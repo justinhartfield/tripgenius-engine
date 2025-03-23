@@ -1,4 +1,3 @@
-
 import { TravelPreferences } from '@/types';
 import { GeneratedItineraryContent } from './itineraryUtils';
 
@@ -118,14 +117,4 @@ export const getStoredApiKey = (): string => {
 // Function to store API key
 export const storeApiKey = (apiKey: string): void => {
   localStorage.setItem('openai_api_key', apiKey);
-};
-
-// Function to fetch images for a destination
-export const fetchDestinationImage = async (destination: string): Promise<string> => {
-  // For now, we'll use a placeholder image service until we integrate with a real API
-  const encodedDestination = encodeURIComponent(destination);
-  
-  // This would normally hit a proper API, but for demo we'll return a placeholder
-  // In a real app, this would be replaced with Google Places API or similar
-  return `https://source.unsplash.com/featured/?${encodedDestination},travel,landmark`;
 };

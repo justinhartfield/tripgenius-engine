@@ -65,7 +65,8 @@ export const DestinationGallery: React.FC<DestinationGalleryProps> = ({
             alt={name} 
             className="w-full h-32 object-cover rounded-lg shadow-md"
             onError={(e) => {
-              e.currentTarget.src = 'https://via.placeholder.com/200x150?text=Image+Not+Available';
+              // Use a default error image instead of placeholder or unsplash
+              e.currentTarget.src = '/lovable-uploads/8c54c5e6-ad02-464b-86cb-e4ec87739e80.png';
             }}
           />
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 rounded-b-lg">

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
@@ -27,7 +26,7 @@ const ItineraryPage: React.FC = () => {
   const [destinationImages, setDestinationImages] = useState<Record<string, string>>({});
   const [googleApiKey, setGoogleApiKey] = useState('');
   const [searchEngineId, setSearchEngineId] = useState('');
-  const [fallbackImageUsed, setFallbackImageUsed] = useState(false);
+  const [configurationNeeded, setConfigurationNeeded] = useState(false);
   
   // Extract state passed from the form
   const { itineraryData, preferences } = location.state || {
@@ -41,6 +40,7 @@ const ItineraryPage: React.FC = () => {
     const storedSearchEngineId = localStorage.getItem('google_search_engine_id') || '';
     setGoogleApiKey(storedGoogleApiKey);
     setSearchEngineId(storedSearchEngineId);
+    setConfigurationNeeded(!storedGoogleApiKey || !storedSearchEngineId);
   }, []);
 
   useEffect(() => {
@@ -53,15 +53,6 @@ const ItineraryPage: React.FC = () => {
 
       setIsLoading(true);
       
-      // Default fallback images for common destinations
-      const fallbackImages: Record<string, string> = {
-        'Las Vegas': '/lovable-uploads/8c54c5e6-ad02-464b-86cb-e4ec87739e80.png',
-        'New York': 'https://source.unsplash.com/random/?new,york,city',
-        'Paris': 'https://source.unsplash.com/random/?paris,eiffel',
-        'Tokyo': 'https://source.unsplash.com/random/?tokyo,japan',
-        'London': 'https://source.unsplash.com/random/?london,uk',
-      };
-
       try {
         // Try to load images using Google API if available
         if (googleApiKey && searchEngineId) {
@@ -71,11 +62,8 @@ const ItineraryPage: React.FC = () => {
               return { name: destination.name, url: imageUrl };
             } catch (error) {
               console.error(`Error fetching image for ${destination.name}:`, error);
-              // Use fallback image if available, otherwise use Unsplash
-              const fallbackUrl = fallbackImages[destination.name] || 
-                `https://source.unsplash.com/featured/?${encodeURIComponent(destination.name)},travel,landmark`;
-              setFallbackImageUsed(true);
-              return { name: destination.name, url: fallbackUrl };
+              // Use our custom error image
+              return { name: destination.name, url: '/lovable-uploads/8c54c5e6-ad02-464b-86cb-e4ec87739e80.png' };
             }
           });
 
@@ -87,29 +75,14 @@ const ItineraryPage: React.FC = () => {
 
           setDestinationImages(imageMap);
         } else {
-          // Use fallback images if no Google API is available
-          const fallbackImageMap = preferences.destinations.reduce((acc, destination) => {
-            const fallbackUrl = fallbackImages[destination.name] || 
-              `https://source.unsplash.com/featured/?${encodeURIComponent(destination.name)},travel,landmark`;
-            acc[destination.name] = fallbackUrl;
-            return acc;
-          }, {} as Record<string, string>);
-          
-          setDestinationImages(fallbackImageMap);
-          setFallbackImageUsed(true);
+          // Empty destination images if no Google API is available to force configuration
+          setDestinationImages({});
+          setConfigurationNeeded(true);
         }
       } catch (error) {
         console.error('Error loading images:', error);
-        // Set fallback images on error
-        const fallbackImageMap = preferences.destinations.reduce((acc, destination) => {
-          const fallbackUrl = fallbackImages[destination.name] || 
-            `https://source.unsplash.com/featured/?${encodeURIComponent(destination.name)},travel,landmark`;
-          acc[destination.name] = fallbackUrl;
-          return acc;
-        }, {} as Record<string, string>);
-        
-        setDestinationImages(fallbackImageMap);
-        setFallbackImageUsed(true);
+        setDestinationImages({});
+        setConfigurationNeeded(true);
       } finally {
         setIsLoading(false);
       }
@@ -235,10 +208,10 @@ const ItineraryPage: React.FC = () => {
         </div>
       ) : (
         <>
-          {fallbackImageUsed && !googleApiKey && (
+          {configurationNeeded && (
             <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-md">
               <p className="text-amber-800 text-sm">
-                Using fallback images. For better quality images, configure Google API settings.
+                Google API configuration required for maps and images. Click on API Settings to configure.
               </p>
             </div>
           )}
