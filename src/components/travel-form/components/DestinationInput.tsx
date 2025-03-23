@@ -31,6 +31,13 @@ export const DestinationInput: React.FC<DestinationInputProps> = ({
     setNewDestination('');
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddDestination();
+    }
+  };
+
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium">Where do you want to go?</label>
