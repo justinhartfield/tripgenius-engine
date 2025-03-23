@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { getStoredApiKey, storeApiKey } from '@/utils/openaiApi';
 import { Key } from 'lucide-react';
-import { getOpenAIApiKey, saveApiKeys, isOpenAIConfigured } from '@/utils/apiKeys';
 
 interface ApiKeyFormProps {
   onApiKeyChange: (apiKey: string) => void;
@@ -16,7 +16,7 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ onApiKeyChange }) => {
 
   useEffect(() => {
     // Check if API key is already stored
-    const storedKey = getOpenAIApiKey();
+    const storedKey = getStoredApiKey();
     if (storedKey) {
       setApiKey(storedKey);
       onApiKeyChange(storedKey);
@@ -24,7 +24,7 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ onApiKeyChange }) => {
   }, [onApiKeyChange]);
 
   const handleSaveApiKey = () => {
-    saveApiKeys({ openaiApiKey: apiKey });
+    storeApiKey(apiKey);
     onApiKeyChange(apiKey);
     setOpen(false);
   };
@@ -34,7 +34,7 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ onApiKeyChange }) => {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <Key className="h-4 w-4" />
-          {isOpenAIConfigured() ? 'API Key Configured' : 'Set OpenAI API Key'}
+          {getStoredApiKey() ? 'API Key Configured' : 'Set OpenAI API Key'}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">

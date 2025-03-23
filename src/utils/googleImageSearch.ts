@@ -1,13 +1,11 @@
 
-import { getGoogleMapsApiKey, getGoogleSearchEngineId } from './apiKeys';
-
 /**
  * Fetch destination images using Google Custom Search API
  */
 export const fetchDestinationImage = async (destination: string): Promise<string> => {
   try {
-    const googleApiKey = getGoogleMapsApiKey();
-    const searchEngineId = getGoogleSearchEngineId();
+    const googleApiKey = localStorage.getItem('google_api_key');
+    const searchEngineId = localStorage.getItem('google_search_engine_id');
     
     if (!googleApiKey || !searchEngineId) {
       // Fallback to placeholder or Unsplash

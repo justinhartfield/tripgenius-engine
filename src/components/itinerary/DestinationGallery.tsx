@@ -1,8 +1,6 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ImageOff } from 'lucide-react';
-import { isGoogleSearchConfigured } from '@/utils/apiKeys';
-import { ApiKeyManager } from '@/components/ApiKeyManager';
 
 interface DestinationGalleryProps {
   destinationImages: Record<string, string>;
@@ -13,17 +11,47 @@ export const DestinationGallery: React.FC<DestinationGalleryProps> = ({
   destinationImages, 
   destinations = [] 
 }) => {
+  const [googleApiKey, setGoogleApiKey] = useState<string>('');
+  const [searchEngineId, setSearchEngineId] = useState<string>('');
+  
+  useEffect(() => {
+    // Try to get Google API key and search engine ID from localStorage
+    const apiKey = localStorage.getItem('google_api_key') || '';
+    const engineId = localStorage.getItem('google_search_engine_id') || '';
+    setGoogleApiKey(apiKey);
+    setSearchEngineId(engineId);
+  }, []);
+
+  const handleConfigClick = () => {
+    const newApiKey = prompt('Enter your Google API Key:');
+    if (newApiKey) {
+      localStorage.setItem('google_api_key', newApiKey);
+      setGoogleApiKey(newApiKey);
+      
+      const newEngineId = prompt('Enter your Google Custom Search Engine ID:');
+      if (newEngineId) {
+        localStorage.setItem('google_search_engine_id', newEngineId);
+        setSearchEngineId(newEngineId);
+      }
+    }
+  };
+  
   if (Object.keys(destinationImages).length === 0 && destinations.length === 0) return null;
   
   // Show configuration notice if API key or search engine ID is missing
-  if (!isGoogleSearchConfigured()) {
+  if (!googleApiKey || !searchEngineId) {
     return (
       <div className="mb-6 p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
         <h3 className="text-lg font-medium mb-2">Destination Images</h3>
         <p className="text-sm text-gray-600 mb-4">
           To show beautiful destination images from Google, you need to configure your Google API Key and Custom Search Engine ID.
         </p>
-        <ApiKeyManager />
+        <button
+          onClick={handleConfigClick}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors"
+        >
+          Configure Google API
+        </button>
       </div>
     );
   }
