@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { fetchItinerary } from '@/utils/openaiApi';
@@ -59,7 +60,8 @@ const ItineraryPage: React.FC = () => {
             });
             return;
           }
-          const data = await fetchItinerary(storedApiKey, preferences, false, slug);
+          // Fixed the function call to match the expected number of arguments
+          const data = await fetchItinerary(storedApiKey, preferences, false);
           setItineraryData(data);
         } catch (error: any) {
           console.error("Failed to fetch itinerary:", error);
