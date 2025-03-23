@@ -30,7 +30,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({
     : 'Your Travel Dates';
   
   // Use the first destination image as the header background, or fallback
-  const headerImage = Object.values(destinationImages)[0] || '/lovable-uploads/8c54c5e6-ad02-464b-86cb-e4ec87739e80.png';
+  const headerImage = Object.values(destinationImages)[0] || '/lovable-uploads/cfdf2a9f-eacd-42f1-bdfa-e8c943137ef2.png';
   
   return (
     <div className="mt-12 max-w-4xl mx-auto">
@@ -75,7 +75,12 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({
             <h3 className="text-xl font-serif text-center uppercase tracking-wide mb-2">DAILY SCHEDULE</h3>
           </div>
           
-          <ItineraryContent itinerary={itinerary} contentRef={contentRef} />
+          <ItineraryContent 
+            itinerary={itinerary} 
+            contentRef={contentRef} 
+            destinationImages={destinationImages}
+            travelPreferences={travelPreferences}
+          />
         </CardContent>
         
         <CardFooter className="border-t pt-4 bg-gray-50">
