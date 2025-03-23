@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowRight, MapPin, Calendar, Star, CreditCard, Ship } from 'lucide-react';
+import { ArrowRight, MapPin, Calendar, Sparkles, CreditCard, Ship, Music } from 'lucide-react';
 import { BlurredOverlay } from '@/components/ui/BlurredOverlay';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -17,13 +17,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       {/* Abstract background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -left-[10%] top-[20%] h-32 w-32 rounded-full bg-primary/20 blur-3xl animate-float" style={{ animationDelay: '0s' }}></div>
-        <div className="absolute left-[60%] top-[10%] h-40 w-40 rounded-full bg-blue-400/20 blur-3xl animate-float" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute left-[60%] top-[10%] h-40 w-40 rounded-full bg-accent/20 blur-3xl animate-float" style={{ animationDelay: '1s' }}></div>
         <div className="absolute left-[30%] bottom-[20%] h-36 w-36 rounded-full bg-primary/10 blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
       </div>
 
       <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center z-10">
         <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-primary mb-6 animate-fade-in">
-          <span>Discover your perfect journey</span>
+          <Sparkles className="mr-2 h-4 w-4" />
+          <span>AI-Powered Travel Planning</span>
         </div>
         
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight max-w-3xl animate-fade-in" style={{ animationDelay: '0.1s' }}>
@@ -51,12 +52,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           {[
             { icon: MapPin, title: 'Destinations', description: 'Choose from anywhere in the world' },
             { icon: Calendar, title: 'Travel Dates', description: 'Plan for any time period' },
-            { icon: Star, title: 'Preferences', description: 'Tailored to your interests' },
+            { icon: Sparkles, title: 'AI Powered', description: 'Tailored to your interests' },
             { icon: Ship, title: 'Complete Plan', description: 'All details taken care of' },
           ].map((feature, i) => (
             <BlurredOverlay
               key={i}
-              className="p-4 flex flex-col items-center text-center animate-scale-in"
+              className="p-4 flex flex-col items-center text-center animate-scale-in glass-card"
               style={{ animationDelay: `${0.4 + i * 0.1}s` }}
             >
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
