@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { MapPin } from 'lucide-react';
 import { TravelPreferences } from '@/types';
-import { getStoredApiKey } from '@/utils/openaiApi';
 
 interface MapDisplayProps {
   travelPreferences?: TravelPreferences;

@@ -1,23 +1,15 @@
+
 import React, { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
-import { ArrowLeft, Share2, Loader2, Settings } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { ItineraryDisplay } from '@/components/ItineraryDisplay';
 import { TravelPreferences } from '@/types';
 import { GeneratedItineraryContent } from '@/utils/itineraryUtils';
 import { fetchDestinationImage } from '@/utils/googleImageSearch';
-import { Link } from 'react-router-dom';
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { ItineraryHeader } from '@/components/itinerary/ItineraryHeader';
+import { ItineraryLoading } from '@/components/itinerary/ItineraryLoading';
+import { ConfigurationWarning } from '@/components/itinerary/ConfigurationWarning';
+import { ItineraryNotFound } from '@/components/itinerary/ItineraryNotFound';
 
 const ItineraryPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -103,24 +95,7 @@ const ItineraryPage: React.FC = () => {
 
   // Handle case where the page is loaded directly without state
   if (!itineraryData || !preferences) {
-    return (
-      <div className="container mx-auto py-12 px-4">
-        <Link to="/">
-          <Button variant="outline" className="mb-6">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Trip Planner
-          </Button>
-        </Link>
-        <div className="text-center py-12">
-          <h1 className="text-2xl font-bold mb-4">Itinerary Not Found</h1>
-          <p className="text-gray-600 mb-6">
-            We couldn't find the itinerary you're looking for. Please return to the trip planner to create a new itinerary.
-          </p>
-          <Link to="/">
-            <Button>Create New Itinerary</Button>
-          </Link>
-        </div>
-      </div>
-    );
+    return <ItineraryNotFound />;
   }
 
   const handleShare = async () => {
@@ -152,69 +127,20 @@ const ItineraryPage: React.FC = () => {
         )}
       </Helmet>
 
-      <div className="flex justify-between items-center mb-8">
-        <Link to="/">
-          <Button variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Trip Planner
-          </Button>
-        </Link>
-        <div className="flex gap-2">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <Settings className="mr-2 h-4 w-4" /> API Settings
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>API Settings</DialogTitle>
-                <DialogDescription>
-                  Configure your API keys for enhanced features
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="google-api-key">Google API Key</Label>
-                  <Input
-                    id="google-api-key"
-                    value={googleApiKey}
-                    onChange={(e) => setGoogleApiKey(e.target.value)}
-                    placeholder="Enter your Google API Key"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="search-engine-id">Google Custom Search Engine ID</Label>
-                  <Input
-                    id="search-engine-id"
-                    value={searchEngineId}
-                    onChange={(e) => setSearchEngineId(e.target.value)}
-                    placeholder="Enter your Search Engine ID"
-                  />
-                </div>
-                <Button onClick={saveApiKeys}>Save Settings</Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-          <Button variant="outline" onClick={handleShare}>
-            <Share2 className="mr-2 h-4 w-4" /> Share Itinerary
-          </Button>
-        </div>
-      </div>
+      <ItineraryHeader 
+        googleApiKey={googleApiKey}
+        searchEngineId={searchEngineId}
+        setGoogleApiKey={setGoogleApiKey}
+        setSearchEngineId={setSearchEngineId}
+        saveApiKeys={saveApiKeys}
+        handleShare={handleShare}
+      />
 
       {isLoading ? (
-        <div className="flex justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-2">Loading destination images...</span>
-        </div>
+        <ItineraryLoading />
       ) : (
         <>
-          {configurationNeeded && (
-            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-md">
-              <p className="text-amber-800 text-sm">
-                Google API configuration required for maps and images. Click on API Settings to configure.
-              </p>
-            </div>
-          )}
+          {configurationNeeded && <ConfigurationWarning />}
           <ItineraryDisplay 
             itinerary={itineraryData.content} 
             travelPreferences={preferences}
