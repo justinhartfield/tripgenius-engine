@@ -27,7 +27,10 @@ const Index: React.FC = () => {
       <NavigationHeader />
       <HeroSection onGetStarted={handleGetStarted} />
       <TravelForm />
-      <ExampleItineraries />
+      
+      <div className="bg-muted/30 py-12">
+        <ExampleItineraries />
+      </div>
     </TravelPreferencesProvider>
   );
 };

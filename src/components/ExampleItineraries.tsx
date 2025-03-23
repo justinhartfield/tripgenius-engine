@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
 import { fetchItinerary } from '@/utils/openaiApi';
@@ -7,6 +7,7 @@ import { useTravelPreferences } from '@/contexts/TravelPreferencesContext';
 import { slugify } from '@/utils/stringUtils';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import { ItineraryCalendarPreview } from './itinerary/ItineraryCalendarPreview';
 
 const examples = [
   {
@@ -50,7 +51,18 @@ export const ExampleItineraries: React.FC = () => {
     openaiApiKey 
   } = useTravelPreferences();
 
-  const handleExampleClick = async (example: typeof examples[0]) => {
+  // State to track the selected example
+  const [selectedExample, setSelectedExample] = useState(examples[0]);
+  
+  // Create a start date for the preview (today)
+  const previewStartDate = new Date();
+
+  const handleExampleClick = (example: typeof examples[0]) => {
+    // Update the selected example for preview
+    setSelectedExample(example);
+  };
+
+  const handleGenerateItinerary = async (example: typeof examples[0]) => {
     if (!openaiApiKey) {
       toast({
         title: "API Key Required",
@@ -156,7 +168,7 @@ export const ExampleItineraries: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto mt-8">
+    <div className="w-full max-w-5xl mx-auto mt-8">
       <div className="flex items-center justify-center space-x-2 mb-4">
         <Sparkles className="h-5 w-5 text-primary" />
         <h2 className="text-xl font-medium">Example Itineraries</h2>
@@ -166,34 +178,61 @@ export const ExampleItineraries: React.FC = () => {
         Try one of these curated trips or create your own
       </p>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {examples.map((example, index) => (
-          <div 
-            key={index}
-            className="glass-card p-5 rounded-lg hover:bg-white/10 transition-all cursor-pointer"
-            onClick={() => handleExampleClick(example)}
-          >
-            <h3 className="font-semibold text-lg">{example.title}</h3>
-            <p className="text-sm text-muted-foreground mb-3">{example.description}</p>
-            <div className="flex flex-wrap gap-2 mb-3">
-              {example.destinations.map((dest, i) => (
-                <span key={i} className="text-xs bg-primary/20 text-primary-foreground px-2 py-1 rounded-full">
-                  {dest}
-                </span>
-              ))}
-            </div>
-            <div className="flex justify-between items-center">
-              <div className="flex space-x-1">
-                {example.interests.slice(0, 3).map((interest, i) => (
-                  <span key={i} className="text-xs text-muted-foreground">
-                    {i > 0 && "•"} {interest}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left column: Example itineraries */}
+        <div className="space-y-4">
+          {examples.map((example, index) => (
+            <div 
+              key={index}
+              className={`glass-card p-5 rounded-lg hover:bg-white/10 transition-all cursor-pointer ${selectedExample.title === example.title ? 'border-primary border-2' : ''}`}
+              onClick={() => handleExampleClick(example)}
+            >
+              <h3 className="font-semibold text-lg">{example.title}</h3>
+              <p className="text-sm text-muted-foreground mb-3">{example.description}</p>
+              <div className="flex flex-wrap gap-2 mb-3">
+                {example.destinations.map((dest, i) => (
+                  <span key={i} className="text-xs bg-primary/20 text-primary-foreground px-2 py-1 rounded-full">
+                    {dest}
                   </span>
                 ))}
               </div>
-              <span className="text-xs text-muted-foreground">{example.days} days</span>
+              <div className="flex justify-between items-center">
+                <div className="flex space-x-1">
+                  {example.interests.slice(0, 3).map((interest, i) => (
+                    <span key={i} className="text-xs text-muted-foreground">
+                      {i > 0 && "•"} {interest}
+                    </span>
+                  ))}
+                </div>
+                <span className="text-xs text-muted-foreground">{example.days} days</span>
+              </div>
+              <div className="mt-4">
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleGenerateItinerary(example);
+                  }}
+                >
+                  Create Itinerary
+                </Button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+        
+        {/* Right column: Calendar preview */}
+        <div className="hidden lg:block">
+          <ItineraryCalendarPreview 
+            title={selectedExample.title}
+            destinations={selectedExample.destinations}
+            startDate={previewStartDate}
+            days={selectedExample.days}
+            interests={selectedExample.interests}
+          />
+        </div>
       </div>
     </div>
   );
