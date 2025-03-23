@@ -34,7 +34,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({
   
   return (
     <div className="mt-12 max-w-4xl mx-auto">
-      <Card className="overflow-hidden border-0 shadow-lg">
+      <Card className="overflow-hidden border border-gray-200 shadow-lg">
         <CardHeader className="bg-blue-600 text-white relative overflow-hidden p-0">
           <div className="absolute inset-0 w-full h-full">
             <img 
@@ -42,7 +42,7 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({
               alt="Cover" 
               className="w-full h-full object-cover opacity-30"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/90 to-indigo-600/90"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/90 to-blue-500/90"></div>
           </div>
           <div className="relative z-10 text-center py-12 px-4">
             <h2 className="text-5xl font-serif mb-2">{mainDestination.toUpperCase()}</h2>

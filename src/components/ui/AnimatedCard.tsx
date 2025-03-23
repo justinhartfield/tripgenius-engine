@@ -20,13 +20,13 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
   const getVariantClasses = () => {
     switch (variant) {
       case 'glass':
-        return 'glass-card';
+        return 'bg-white/90 backdrop-blur-sm border border-gray-200/80';
       case 'outline':
-        return 'bg-transparent border border-border';
+        return 'bg-transparent border border-gray-200';
       case 'subtle':
-        return 'bg-muted/50';
+        return 'bg-gray-50';
       default:
-        return 'bg-card text-card-foreground shadow-elevation-2';
+        return 'bg-white text-gray-900 shadow-sm border border-gray-200';
     }
   };
 

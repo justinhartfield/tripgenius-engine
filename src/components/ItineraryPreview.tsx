@@ -44,7 +44,7 @@ export const ItineraryPreview: React.FC<ItineraryPreviewProps> = ({
         {days > 3 && (
           <BlurredOverlay className="py-4 px-6 text-center mt-4">
             <p className="text-sm font-medium">+{days - 3} more days</p>
-            <p className="text-xs text-muted-foreground">Complete the form to see your full itinerary</p>
+            <p className="text-xs text-gray-500">Complete the form to see your full itinerary</p>
           </BlurredOverlay>
         )}
       </div>

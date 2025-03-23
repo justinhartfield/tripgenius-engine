@@ -28,7 +28,7 @@ const Index: React.FC = () => {
       <HeroSection onGetStarted={handleGetStarted} />
       <TravelForm />
       
-      <div className="bg-muted/30 py-12">
+      <div className="bg-blue-50 py-12">
         <ExampleItineraries />
       </div>
     </TravelPreferencesProvider>
