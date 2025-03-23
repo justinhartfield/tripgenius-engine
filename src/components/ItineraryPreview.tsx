@@ -5,7 +5,8 @@ import { BlurredOverlay } from '@/components/ui/BlurredOverlay';
 import { TravelPreferences } from '@/types';
 import { PreviewHeader } from './itinerary/PreviewHeader';
 import { PreviewDay } from './itinerary/PreviewDay';
-import { generateSampleItinerary } from './itinerary/PreviewItineraryGenerator';
+import { generateSampleItinerary } from '@/utils/itineraryGenerator';
+import { calculateTripDuration } from '@/utils/activityGenerator';
 
 interface ItineraryPreviewProps {
   preferences: TravelPreferences;
@@ -16,10 +17,7 @@ export const ItineraryPreview: React.FC<ItineraryPreviewProps> = ({
 }) => {
   const { destinations, dateRange } = preferences;
   
-  const days = dateRange.startDate && dateRange.endDate
-    ? Math.ceil((dateRange.endDate.getTime() - dateRange.startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
-    : 0;
-
+  const days = calculateTripDuration(dateRange.startDate, dateRange.endDate);
   const sampleItinerary = generateSampleItinerary(preferences);
 
   if (destinations.length === 0 || !dateRange.startDate || !dateRange.endDate) {
