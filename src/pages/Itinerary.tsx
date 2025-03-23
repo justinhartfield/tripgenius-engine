@@ -29,7 +29,7 @@ const ItineraryPage: React.FC = () => {
   const [copySuccess, setCopySuccess] = useState(false);
   const [googleApiKey, setGoogleApiKey] = useState(localStorage.getItem('google_api_key') || '');
   const [searchEngineId, setSearchEngineId] = useState(localStorage.getItem('google_search_engine_id') || '');
-  const [preferences, setPreferences] = useState<TravelPreferences>(location.state?.preferences || null);
+  const [preferences, setPreferences] = useState<TravelPreferences | null>(location.state?.preferences || null);
   const contentRef = useRef<HTMLDivElement>(null);
   
   // Save API keys to localStorage
@@ -61,7 +61,16 @@ const ItineraryPage: React.FC = () => {
             return;
           }
           // Fixed the function call to match the expected number of arguments
-          const data = await fetchItinerary(storedApiKey, preferences, false);
+          const data = await fetchItinerary(storedApiKey, preferences || {
+            destinations: [],
+            dateRange: { startDate: null, endDate: null },
+            budget: { min: 0, max: 0, currency: 'USD' },
+            interests: [],
+            accommodationTypes: [],
+            transportationTypes: [],
+            tourGuidePreference: 'rick-steves',
+            personalPreferences: ''
+          }, false);
           setItineraryData(data);
         } catch (error: any) {
           console.error("Failed to fetch itinerary:", error);
@@ -92,7 +101,7 @@ const ItineraryPage: React.FC = () => {
     }
 
     try {
-      const shareableLink = await generateShareableLink(itineraryData.id);
+      const shareableLink = await generateShareableLink(itineraryData.id || slug || 'default-id');
       if (shareableLink) {
         navigator.clipboard.writeText(shareableLink);
         setCopySuccess(true);
@@ -136,9 +145,24 @@ const ItineraryPage: React.FC = () => {
       ) : itineraryData ? (
         <ScrollArea className="h-[700px] w-full rounded-md border">
           <div ref={contentRef} className="space-y-4 p-4">
-            {itineraryData.sections.map((section: any) => (
-              <ItinerarySection key={section.id} section={section} />
-            ))}
+            {itineraryData.sections && itineraryData.sections.length > 0 ? (
+              itineraryData.sections.map((section: any) => (
+                <ItinerarySection key={section.id} section={section} />
+              ))
+            ) : (
+              <div className="p-6 bg-white/70 rounded-lg shadow-md">
+                <h3 className="text-xl font-medium mb-4 text-blue-800">Your Itinerary</h3>
+                <div className="prose prose-blue max-w-none">
+                  {typeof itineraryData === 'string' ? (
+                    <p>{itineraryData}</p>
+                  ) : itineraryData.content ? (
+                    <p>{itineraryData.content}</p>
+                  ) : (
+                    <p>No content available for this itinerary.</p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </ScrollArea>
       ) : (
