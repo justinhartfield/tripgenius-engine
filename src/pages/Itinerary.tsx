@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
@@ -11,6 +10,7 @@ import { ItineraryLoading } from '@/components/itinerary/ItineraryLoading';
 import { ConfigurationWarning } from '@/components/itinerary/ConfigurationWarning';
 import { ItineraryNotFound } from '@/components/itinerary/ItineraryNotFound';
 import { NavigationHeader } from '@/components/NavigationHeader';
+import { toast } from '@/components/ui/use-toast';
 
 const ItineraryPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -24,14 +24,38 @@ const ItineraryPage: React.FC = () => {
   const [itineraryData, setItineraryData] = useState<GeneratedItineraryContent | null>(null);
   const [preferences, setPreferences] = useState<TravelPreferences | null>(null);
   
-  // Load itinerary data either from route state or from localStorage
   useEffect(() => {
     if (location.state?.itineraryData && location.state?.preferences) {
-      // Data passed directly through route state (from form)
       setItineraryData(location.state.itineraryData);
       setPreferences(location.state.preferences);
+      
+      try {
+        const storedPlansJson = localStorage.getItem('travel_plans');
+        const storedPlans = storedPlansJson ? JSON.parse(storedPlansJson) : [];
+        
+        const newPlan = {
+          slug: location.state.itineraryData.slug,
+          itineraryData: location.state.itineraryData,
+          preferences: location.state.preferences,
+          createdAt: Date.now()
+        };
+        
+        const planIndex = storedPlans.findIndex((p: any) => p.slug === newPlan.slug);
+        if (planIndex >= 0) {
+          storedPlans[planIndex] = newPlan;
+        } else {
+          storedPlans.push(newPlan);
+        }
+        
+        localStorage.setItem('travel_plans', JSON.stringify(storedPlans));
+        toast({
+          title: "Plan saved",
+          description: "Your travel plan has been saved and can be accessed from the Browse Plans page.",
+        });
+      } catch (err) {
+        console.error("Error saving plan to localStorage:", err);
+      }
     } else if (slug) {
-      // Try to load from localStorage by slug
       try {
         const storedPlansJson = localStorage.getItem('travel_plans');
         if (storedPlansJson) {
@@ -50,7 +74,6 @@ const ItineraryPage: React.FC = () => {
   }, [slug, location.state]);
 
   useEffect(() => {
-    // Load API keys from localStorage
     const storedGoogleApiKey = localStorage.getItem('google_api_key') || '';
     const storedSearchEngineId = localStorage.getItem('google_search_engine_id') || '';
     setGoogleApiKey(storedGoogleApiKey);
@@ -59,7 +82,6 @@ const ItineraryPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Load destination images
     const loadImages = async () => {
       if (!preferences?.destinations.length) {
         setIsLoading(false);
@@ -69,7 +91,6 @@ const ItineraryPage: React.FC = () => {
       setIsLoading(true);
       
       try {
-        // Try to load images using Google API if available
         if (googleApiKey && searchEngineId) {
           const imagePromises = preferences.destinations.map(async destination => {
             try {
@@ -78,7 +99,6 @@ const ItineraryPage: React.FC = () => {
             } catch (error) {
               console.error(`Error fetching image for ${destination.name}:`, error);
               
-              // Store the error in localStorage to display in DestinationGallery
               if (error instanceof Error && error.message.includes('Custom Search API is not enabled')) {
                 localStorage.setItem('google_api_error', 
                   'The Google Custom Search API is not enabled for your project. Please visit the Google Cloud Console ' +
@@ -86,7 +106,6 @@ const ItineraryPage: React.FC = () => {
                 );
               }
               
-              // Use our custom error image
               return { name: destination.name, url: '/lovable-uploads/8c54c5e6-ad02-464b-86cb-e4ec87739e80.png' };
             }
           });
@@ -99,7 +118,6 @@ const ItineraryPage: React.FC = () => {
 
           setDestinationImages(imageMap);
         } else {
-          // Empty destination images if no Google API is available to force configuration
           setDestinationImages({});
           setConfigurationNeeded(true);
         }
@@ -127,13 +145,11 @@ const ItineraryPage: React.FC = () => {
       localStorage.setItem('google_search_engine_id', searchEngineId);
     }
     
-    // Clear any stored errors when updating configuration
     localStorage.removeItem('google_api_error');
     
     window.location.reload();
   };
 
-  // Handle case where the page is loaded directly without data
   if (!itineraryData || !preferences) {
     return <ItineraryNotFound />;
   }
@@ -181,6 +197,7 @@ const ItineraryPage: React.FC = () => {
           saveApiKeys={saveApiKeys}
           handleShare={handleShare}
           onBrowsePlans={navigateToPlans}
+          itineraryContent={itineraryData.content}
         />
 
         {isLoading ? (

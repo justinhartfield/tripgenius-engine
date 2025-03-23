@@ -74,7 +74,7 @@ export const generateItinerary = async (
 };
 
 // Save itinerary to localStorage for browsing later
-const saveItineraryToLocalStorage = (
+export const saveItineraryToLocalStorage = (
   itineraryData: GeneratedItineraryContent, 
   preferences: TravelPreferences
 ) => {
@@ -83,11 +83,20 @@ const saveItineraryToLocalStorage = (
     const existingPlansJson = localStorage.getItem('travel_plans');
     const existingPlans = existingPlansJson ? JSON.parse(existingPlansJson) : [];
     
+    // Make sure dates are stringified for storage
+    const preferencesForStorage = {
+      ...preferences,
+      dateRange: {
+        startDate: preferences.dateRange.startDate ? preferences.dateRange.startDate.toISOString() : null,
+        endDate: preferences.dateRange.endDate ? preferences.dateRange.endDate.toISOString() : null
+      }
+    };
+    
     // Create new plan object
     const newPlan = {
       slug: itineraryData.slug,
       itineraryData,
-      preferences,
+      preferences: preferencesForStorage,
       createdAt: Date.now()
     };
     

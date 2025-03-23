@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { MapPin, Calendar, Filter, Search } from 'lucide-react';
 import { TravelPreferences } from '@/types';
 import { GeneratedItineraryContent } from '@/utils/itinerary';
+import { NavigationHeader } from '@/components/NavigationHeader';
 
 // Define the structure of a saved plan
 interface SavedPlan {
@@ -31,8 +32,28 @@ const PlansPage: React.FC = () => {
     if (storedPlans) {
       try {
         const parsedPlans = JSON.parse(storedPlans) as SavedPlan[];
+        
+        // Process the plans to convert ISO date strings back to Date objects
+        const processedPlans = parsedPlans.map(plan => {
+          // Handle string dates from localStorage
+          if (plan.preferences.dateRange) {
+            const { startDate, endDate } = plan.preferences.dateRange;
+            return {
+              ...plan,
+              preferences: {
+                ...plan.preferences,
+                dateRange: {
+                  startDate: startDate ? new Date(startDate) : null,
+                  endDate: endDate ? new Date(endDate) : null
+                }
+              }
+            };
+          }
+          return plan;
+        });
+        
         // Sort by newest first
-        const sortedPlans = parsedPlans.sort((a, b) => b.createdAt - a.createdAt);
+        const sortedPlans = processedPlans.sort((a, b) => b.createdAt - a.createdAt);
         setPlans(sortedPlans);
         setFilteredPlans(sortedPlans);
       } catch (error) {
@@ -95,130 +116,133 @@ const PlansPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto py-12 px-4">
-      <Helmet>
-        <title>Browse Travel Plans | Travel Itinerary Planner</title>
-        <meta name="description" content="Browse and search through personalized AI-generated travel itineraries and plans." />
-      </Helmet>
-      
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-2">Your Travel Plans</h1>
-        <p className="text-muted-foreground mb-6">Browse and search through your personalized travel itineraries</p>
+    <>
+      <NavigationHeader />
+      <div className="container mx-auto py-12 px-4">
+        <Helmet>
+          <title>Browse Travel Plans | Travel Itinerary Planner</title>
+          <meta name="description" content="Browse and search through personalized AI-generated travel itineraries and plans." />
+        </Helmet>
         
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row gap-4 mb-4">
-            <div className="relative flex-grow">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Search plans..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold mb-2">Your Travel Plans</h1>
+          <p className="text-muted-foreground mb-6">Browse and search through your personalized travel itineraries</p>
+          
+          <div className="mb-8">
+            <div className="flex flex-col sm:flex-row gap-4 mb-4">
+              <div className="relative flex-grow">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Search plans..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={clearFilters}
+                  disabled={!searchTerm && !selectedDestination && !selectedInterest}
+                >
+                  <Filter className="h-4 w-4" />
+                </Button>
+                <Link to="/">
+                  <Button>Create New Plan</Button>
+                </Link>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="icon"
-                onClick={clearFilters}
-                disabled={!searchTerm && !selectedDestination && !selectedInterest}
-              >
-                <Filter className="h-4 w-4" />
-              </Button>
+            
+            {/* Filters */}
+            <div className="flex flex-wrap gap-2 mb-2">
+              {allDestinations.map(destination => (
+                <Button
+                  key={destination}
+                  variant={selectedDestination === destination ? "default" : "outline"}
+                  size="sm"
+                  className="flex items-center gap-1"
+                  onClick={() => setSelectedDestination(
+                    selectedDestination === destination ? null : destination
+                  )}
+                >
+                  <MapPin className="h-3 w-3" />
+                  {destination}
+                </Button>
+              ))}
+            </div>
+            
+            <div className="flex flex-wrap gap-2">
+              {allInterests.map(interest => (
+                <Button
+                  key={interest}
+                  variant={selectedInterest === interest ? "default" : "outline"}
+                  size="sm"
+                  className="flex items-center gap-1"
+                  onClick={() => setSelectedInterest(
+                    selectedInterest === interest ? null : interest
+                  )}
+                >
+                  {interest}
+                </Button>
+              ))}
+            </div>
+          </div>
+          
+          <Separator className="mb-6" />
+          
+          {filteredPlans.length === 0 ? (
+            <div className="text-center py-12">
+              <h3 className="text-xl font-medium mb-2">No plans found</h3>
+              <p className="text-muted-foreground mb-6">Try adjusting your filters or create a new travel plan</p>
               <Link to="/">
                 <Button>Create New Plan</Button>
               </Link>
             </div>
-          </div>
-          
-          {/* Filters */}
-          <div className="flex flex-wrap gap-2 mb-2">
-            {allDestinations.map(destination => (
-              <Button
-                key={destination}
-                variant={selectedDestination === destination ? "default" : "outline"}
-                size="sm"
-                className="flex items-center gap-1"
-                onClick={() => setSelectedDestination(
-                  selectedDestination === destination ? null : destination
-                )}
-              >
-                <MapPin className="h-3 w-3" />
-                {destination}
-              </Button>
-            ))}
-          </div>
-          
-          <div className="flex flex-wrap gap-2">
-            {allInterests.map(interest => (
-              <Button
-                key={interest}
-                variant={selectedInterest === interest ? "default" : "outline"}
-                size="sm"
-                className="flex items-center gap-1"
-                onClick={() => setSelectedInterest(
-                  selectedInterest === interest ? null : interest
-                )}
-              >
-                {interest}
-              </Button>
-            ))}
-          </div>
-        </div>
-        
-        <Separator className="mb-6" />
-        
-        {filteredPlans.length === 0 ? (
-          <div className="text-center py-12">
-            <h3 className="text-xl font-medium mb-2">No plans found</h3>
-            <p className="text-muted-foreground mb-6">Try adjusting your filters or create a new travel plan</p>
-            <Link to="/">
-              <Button>Create New Plan</Button>
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filteredPlans.map((plan) => {
-              const { startDate, endDate } = plan.preferences.dateRange;
-              const dateStr = startDate && endDate 
-                ? `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`
-                : 'Flexible dates';
-                
-              return (
-                <Card key={plan.slug} className="overflow-hidden flex flex-col">
-                  <div className="p-4 flex-grow">
-                    <h2 className="text-xl font-semibold mb-2 line-clamp-2">
-                      {plan.itineraryData.title}
-                    </h2>
-                    <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-                      {plan.itineraryData.description}
-                    </p>
-                    
-                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-                      <MapPin className="h-4 w-4" />
-                      <span>
-                        {plan.preferences.destinations.map(d => d.name).join(', ')}
-                      </span>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <Calendar className="h-4 w-4" />
-                      <span>{dateStr}</span>
-                    </div>
-                  </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredPlans.map((plan) => {
+                const { startDate, endDate } = plan.preferences.dateRange;
+                const dateStr = startDate && endDate 
+                  ? `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`
+                  : 'Flexible dates';
                   
-                  <div className="p-4 bg-gray-50 border-t">
-                    <Link to={`/plans/${plan.slug}`}>
-                      <Button variant="outline" className="w-full">View Plan</Button>
-                    </Link>
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
-        )}
+                return (
+                  <Card key={plan.slug} className="overflow-hidden flex flex-col">
+                    <div className="p-4 flex-grow">
+                      <h2 className="text-xl font-semibold mb-2 line-clamp-2">
+                        {plan.itineraryData.title}
+                      </h2>
+                      <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+                        {plan.itineraryData.description}
+                      </p>
+                      
+                      <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                        <MapPin className="h-4 w-4" />
+                        <span>
+                          {plan.preferences.destinations.map(d => d.name).join(', ')}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <Calendar className="h-4 w-4" />
+                        <span>{dateStr}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 bg-gray-50 border-t">
+                      <Link to={`/plans/${plan.slug}`}>
+                        <Button variant="outline" className="w-full">View Plan</Button>
+                      </Link>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

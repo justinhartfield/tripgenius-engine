@@ -24,7 +24,7 @@ export const TravelForm: React.FC = () => {
   });
 
   return (
-    <section className="py-12 px-4 sm:px-6 lg:px-8 container mx-auto">
+    <section id="travel-form" className="py-12 px-4 sm:px-6 lg:px-8 container mx-auto">
       <StepIndicator 
         steps={STEPS} 
         currentStep={currentStep} 

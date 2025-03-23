@@ -14,6 +14,7 @@ interface ItineraryHeaderProps {
   saveApiKeys: () => void;
   handleShare: () => void;
   onBrowsePlans?: () => void;
+  itineraryContent?: string;
 }
 
 export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
@@ -23,7 +24,8 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
   setSearchEngineId,
   saveApiKeys,
   handleShare,
-  onBrowsePlans
+  onBrowsePlans,
+  itineraryContent
 }) => {
   return (
     <div className="mb-8">
@@ -40,7 +42,9 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
             <Share2 className="mr-2 h-4 w-4" />
             Share
           </Button>
-          <CalendarExport />
+          {itineraryContent && (
+            <CalendarExport itinerary={itineraryContent} contentRef={null} />
+          )}
           <ApiSettingsDialog
             googleApiKey={googleApiKey}
             searchEngineId={searchEngineId}
