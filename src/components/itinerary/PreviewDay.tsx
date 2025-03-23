@@ -18,9 +18,15 @@ interface PreviewDayProps {
   };
   dayIndex: number;
   destinationImages?: Record<string, string>;
+  tourGuideType?: string;
 }
 
-export const PreviewDay: React.FC<PreviewDayProps> = ({ day, dayIndex, destinationImages = {} }) => {
+export const PreviewDay: React.FC<PreviewDayProps> = ({ 
+  day, 
+  dayIndex, 
+  destinationImages = {},
+  tourGuideType = 'rick-steves'
+}) => {
   const dayOfMonth = format(day.date, 'd');
   const dayOfWeek = format(day.date, 'EEEE');
   const monthYear = format(day.date, 'MMMM yyyy');
@@ -65,8 +71,8 @@ export const PreviewDay: React.FC<PreviewDayProps> = ({ day, dayIndex, destinati
             interest={activity.interest}
             icon={getActivityIcon(activity.interest)}
             animationDelay={(dayIndex * 0.1) + (actIndex * 0.05)}
-            description={`This ${activity.interest.toLowerCase()} activity is perfect for your preferences and fits well with your itinerary.`}
             thumbnail={getRandomThumbnail()}
+            tourGuideType={tourGuideType}
           />
         ))}
       </div>

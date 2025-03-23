@@ -76,6 +76,7 @@ export const ItineraryContent: React.FC<ItineraryContentProps> = ({
             day={day} 
             dayIndex={index} 
             destinationImages={destinationImages}
+            tourGuideType={travelPreferences?.tourGuidePreference || 'rick-steves'}
           />
         ))}
       </div>
