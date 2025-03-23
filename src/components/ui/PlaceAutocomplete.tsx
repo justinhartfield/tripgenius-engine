@@ -29,15 +29,15 @@ export const PlaceAutocomplete: React.FC<PlaceAutocompleteProps> = ({
   useEffect(() => {
     // Check if Google Maps API is available
     const googleApiKey = localStorage.getItem('google_api_key');
-    if (!googleApiKey || !window.google || !window.google.maps || !window.google.maps.places) {
+    if (!googleApiKey || typeof window.google === 'undefined' || !window.google.maps || !window.google.maps.places) {
       return;
     }
 
-    autocompleteService.current = new google.maps.places.AutocompleteService();
+    autocompleteService.current = new window.google.maps.places.AutocompleteService();
     
     // Create a dummy element for the PlacesService (it requires a DOM element)
     const dummyElement = document.createElement('div');
-    placesService.current = new google.maps.places.PlacesService(dummyElement);
+    placesService.current = new window.google.maps.places.PlacesService(dummyElement);
     
     // Add click outside listener to close dropdown
     const handleClickOutside = (event: MouseEvent) => {
@@ -65,7 +65,7 @@ export const PlaceAutocomplete: React.FC<PlaceAutocompleteProps> = ({
         { input: value, types: ['(cities)'] },
         (predictions, status) => {
           setLoading(false);
-          if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
+          if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
             setPredictions(predictions);
           } else {
             setPredictions([]);
@@ -84,7 +84,7 @@ export const PlaceAutocomplete: React.FC<PlaceAutocompleteProps> = ({
     placesService.current.getDetails(
       { placeId: prediction.place_id },
       (place, status) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK && place) {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && place) {
           onChange(prediction.description);
           if (onPlaceSelect) {
             onPlaceSelect(place);
@@ -105,7 +105,7 @@ export const PlaceAutocomplete: React.FC<PlaceAutocompleteProps> = ({
           placeholder={placeholder}
           value={value}
           onChange={handleInputChange}
-          onFocus={() => value.length > 1 && setPredictions.length > 0 && setShowDropdown(true)}
+          onFocus={() => value.length > 1 && predictions.length > 0 && setShowDropdown(true)}
           className={className}
         />
         <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">

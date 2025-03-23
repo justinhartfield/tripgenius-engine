@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { HeroSection } from '@/components/HeroSection';
 import { ExampleItineraries } from '@/components/ExampleItineraries';
@@ -19,15 +19,30 @@ const Index: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    // Load Google Maps API dynamically with async attribute
+    const loadGoogleMapsApi = () => {
+      const googleApiKey = localStorage.getItem('google_api_key') || '';
+      if (!googleApiKey) return;
+      
+      // Check if the API is already loaded
+      if (window.google && window.google.maps) return;
+      
+      // Create script element
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${googleApiKey}&libraries=places`;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    };
+    
+    loadGoogleMapsApi();
+  }, []);
+
   return (
     <TravelPreferencesProvider>
       <Helmet>
         <title>Create Your Perfect Travel Itinerary | AI Travel Planner</title>
-        <script
-          src={`https://maps.googleapis.com/maps/api/js?key=${localStorage.getItem('google_api_key') || ''}&libraries=places`}
-          async
-          defer
-        ></script>
       </Helmet>
       <NavigationHeader />
       <HeroSection onGetStarted={handleGetStarted} />

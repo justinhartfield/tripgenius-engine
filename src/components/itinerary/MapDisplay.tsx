@@ -29,8 +29,8 @@ export const MapDisplay: React.FC<MapDisplayProps> = ({ travelPreferences }) => 
     setGoogleApiKey(apiKey);
     
     // Initialize Google Maps services if API key is available
-    if (apiKey && window.google && window.google.maps) {
-      directionsServiceRef.current = new google.maps.DirectionsService();
+    if (apiKey && typeof window.google !== 'undefined' && window.google.maps) {
+      directionsServiceRef.current = new window.google.maps.DirectionsService();
     }
   }, []);
   
@@ -61,14 +61,14 @@ export const MapDisplay: React.FC<MapDisplayProps> = ({ travelPreferences }) => 
     if (!googleApiKey || !travelPreferences?.destinations.length || travelPreferences.destinations.length < 2) return;
     
     // Create map instance if it doesn't exist
-    if (!mapInstanceRef.current && mapRef.current && window.google) {
-      mapInstanceRef.current = new google.maps.Map(mapRef.current, {
+    if (!mapInstanceRef.current && mapRef.current && typeof window.google !== 'undefined') {
+      mapInstanceRef.current = new window.google.maps.Map(mapRef.current, {
         zoom: 4,
         center: { lat: 0, lng: 0 },
       });
       
       // Create directions renderer
-      directionsRendererRef.current = new google.maps.DirectionsRenderer({
+      directionsRendererRef.current = new window.google.maps.DirectionsRenderer({
         map: mapInstanceRef.current,
         suppressMarkers: false,
         polylineOptions: {
@@ -98,14 +98,14 @@ export const MapDisplay: React.FC<MapDisplayProps> = ({ travelPreferences }) => 
         origin,
         destination,
         waypoints,
-        travelMode: google.maps.TravelMode.DRIVING,
+        travelMode: window.google.maps.TravelMode.DRIVING,
         optimizeWaypoints: true
       }, (result, status) => {
-        if (status === google.maps.DirectionsStatus.OK && result) {
+        if (status === window.google.maps.DirectionsStatus.OK && result) {
           directionsRendererRef.current?.setDirections(result);
           
           // Center the map based on the route bounds
-          const bounds = new google.maps.LatLngBounds();
+          const bounds = new window.google.maps.LatLngBounds();
           const route = result.routes[0];
           route.legs.forEach((leg) => {
             leg.steps.forEach((step) => {
