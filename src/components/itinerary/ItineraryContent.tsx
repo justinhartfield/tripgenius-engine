@@ -60,10 +60,10 @@ export const ItineraryContent: React.FC<ItineraryContentProps> = ({
 
   if (parsedDays.length > 0) {
     return (
-      <div ref={contentRef} className="space-y-6 py-6">
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <CalendarClock className="h-6 w-6 text-primary" />
-          <h2 className="text-2xl font-semibold text-center">Your Day-by-Day Itinerary</h2>
+      <div ref={contentRef} className="space-y-8 py-6">
+        <div className="flex items-center justify-center gap-3 mb-8">
+          <CalendarClock className="h-7 w-7 text-primary" />
+          <h2 className="text-2xl md:text-3xl font-semibold text-center">Your Day-by-Day Itinerary</h2>
         </div>
         
         {parsedDays.map((day, index) => (

@@ -21,7 +21,7 @@
     --secondary-foreground: 0 0% 98%;
  
     --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted-foreground: 240 5% 74.9%;  /* Increased brightness for better contrast */
  
     --accent: 267 75% 65%;
     --accent-foreground: 0 0% 98%;
@@ -130,3 +130,23 @@
   @apply px-3 py-1.5 rounded-md text-sm bg-white/10 hover:bg-white/20 transition-colors duration-200 cursor-pointer;
 }
 
+/* Itinerary specific styles */
+.itinerary-day-indicator {
+  @apply w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-center flex-shrink-0;
+}
+
+.itinerary-time-label {
+  @apply text-sm font-semibold text-gray-300;
+}
+
+.itinerary-activity-card {
+  @apply rounded-lg shadow-sm overflow-hidden border-2;
+}
+
+.itinerary-tag {
+  @apply text-xs font-medium rounded-full px-2.5 py-0.5 whitespace-nowrap;
+}
+
+.itinerary-detail-text {
+  @apply text-gray-100 whitespace-pre-line;
+}

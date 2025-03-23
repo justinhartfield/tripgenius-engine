@@ -24,6 +24,7 @@ export const PreviewDay: React.FC<PreviewDayProps> = ({ day, dayIndex, destinati
   const dayOfMonth = format(day.date, 'd');
   const dayOfWeek = format(day.date, 'EEEE');
   const monthYear = format(day.date, 'MMMM yyyy');
+  const monthShort = format(day.date, 'MMM');
   
   // Pick a random destination image for activity thumbnails if available
   const getRandomThumbnail = () => {
@@ -36,26 +37,26 @@ export const PreviewDay: React.FC<PreviewDayProps> = ({ day, dayIndex, destinati
   
   return (
     <div className="space-y-2 animate-fade-in" style={{ animationDelay: `${dayIndex * 0.1}s` }}>
-      <div className="flex items-center gap-2 mb-6 pt-4">
-        <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-center flex-shrink-0">
+      <div className="flex items-center gap-3 mb-6 pt-6">
+        <div className="itinerary-day-indicator">
           <div>
-            <div className="text-xs text-primary font-medium">{format(day.date, 'MMM')}</div>
-            <div className="text-xl font-bold text-primary leading-tight">{dayOfMonth}</div>
+            <div className="text-sm text-primary font-medium">{monthShort}</div>
+            <div className="text-2xl font-bold text-primary leading-tight">{dayOfMonth}</div>
           </div>
         </div>
         
         <div className="flex-1">
-          <h3 className="font-semibold text-lg">
+          <h3 className="font-semibold text-xl">
             Day {dayIndex + 1}: {dayOfWeek}
           </h3>
-          <div className="flex items-center text-xs text-gray-500">
-            <Calendar className="h-3 w-3 mr-1" />
+          <div className="flex items-center text-sm text-gray-300">
+            <Calendar className="h-4 w-4 mr-1.5" />
             {monthYear}
           </div>
         </div>
       </div>
       
-      <div className="border-l-2 border-primary/20 pl-[calc(0.75rem+12px)] ml-7 pt-2">
+      <div className="border-l-2 border-primary/30 pl-[calc(0.75rem+12px)] ml-8 pt-2">
         {day.activities.map((activity, actIndex) => (
           <PreviewActivity
             key={actIndex}

@@ -35,7 +35,7 @@ export const generateItinerary = async (
   try {
     const itineraryData = await fetchItinerary(openaiApiKey, preferences, true);
     
-    // Create a slug from the title using slugify instead of createSlug
+    // Create a slug from the title using slugify
     let slug = '';
     if (typeof itineraryData === 'object' && itineraryData.title) {
       slug = slugify(itineraryData.title);
