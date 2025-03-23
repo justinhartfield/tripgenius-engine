@@ -29,7 +29,8 @@ export const ItineraryContent: React.FC<ItineraryContentProps> = ({
     }
 
     // Convert markdown to HTML using marked
-    const html = marked(cleanContent);
+    // Make sure to use synchronous version of marked to avoid returning a promise
+    const html = marked.parse(cleanContent, { async: false }) as string;
     
     // Sanitize HTML to prevent XSS
     const sanitizedHtml = DOMPurify.sanitize(html);
