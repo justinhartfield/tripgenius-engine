@@ -18,6 +18,12 @@ const App = () => (
       <Helmet titleTemplate="%s | Travel Itinerary Planner" defaultTitle="Travel Itinerary Planner">
         <meta name="description" content="Create personalized travel itineraries with AI" />
       </Helmet>
+      
+      {/* Cloud elements */}
+      <div className="cloud cloud-1"></div>
+      <div className="cloud cloud-2"></div>
+      <div className="cloud cloud-3"></div>
+      
       <Toaster />
       <Sonner />
       <BrowserRouter>

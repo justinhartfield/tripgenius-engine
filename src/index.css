@@ -5,7 +5,7 @@
  
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 210 80% 95%;
     --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
@@ -38,6 +38,85 @@
  
   body {
     @apply bg-background text-foreground;
+    background-color: hsl(210, 80%, 95%);
+    background-image: 
+      radial-gradient(at 50% 100%, hsla(210, 100%, 95%, 0.3) 0px, transparent 50%),
+      radial-gradient(at 0% 0%, hsla(210, 100%, 98%, 0.25) 0px, transparent 50%);
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Cloud animation */
+  body::before,
+  body::after {
+    content: "";
+    position: fixed;
+    width: 300px;
+    height: 300px;
+    background: white;
+    border-radius: 100% 100% 0 0;
+    filter: blur(40px);
+    opacity: 0.6;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  body::before {
+    top: 10%;
+    left: 10%;
+    animation: float 20s ease-in-out infinite;
+  }
+
+  body::after {
+    top: 70%;
+    right: 10%;
+    width: 400px;
+    height: 400px;
+    animation: float 25s ease-in-out infinite reverse;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      transform: translateY(-30px) scale(1.05);
+    }
+  }
+
+  /* Additional clouds */
+  .cloud {
+    position: fixed;
+    background: white;
+    border-radius: 100px;
+    filter: blur(20px);
+    opacity: 0.3;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .cloud-1 {
+    width: 200px;
+    height: 100px;
+    top: 25%;
+    left: 20%;
+    animation: float 30s ease-in-out infinite 2s;
+  }
+
+  .cloud-2 {
+    width: 250px;
+    height: 120px;
+    top: 40%;
+    right: 25%;
+    animation: float 25s ease-in-out infinite 1s;
+  }
+
+  .cloud-3 {
+    width: 180px;
+    height: 90px;
+    bottom: 30%;
+    left: 30%;
+    animation: float 22s ease-in-out infinite 5s;
   }
 }
 

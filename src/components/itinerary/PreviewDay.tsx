@@ -42,9 +42,9 @@ export const PreviewDay: React.FC<PreviewDayProps> = ({
   };
   
   return (
-    <div className="space-y-2 animate-fade-in" style={{ animationDelay: `${dayIndex * 0.1}s` }}>
-      <div className="flex items-center gap-3 mb-6 pt-6">
-        <div className="itinerary-day-indicator">
+    <div className="space-y-2 animate-fade-in backdrop-blur-sm bg-white/40 rounded-xl p-6 shadow-glass" style={{ animationDelay: `${dayIndex * 0.1}s` }}>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="itinerary-day-indicator bg-primary/10 shadow-sm">
           <div>
             <div className="text-sm text-primary font-medium">{monthShort}</div>
             <div className="text-2xl font-bold text-primary leading-tight">{dayOfMonth}</div>
@@ -55,7 +55,7 @@ export const PreviewDay: React.FC<PreviewDayProps> = ({
           <h3 className="font-semibold text-xl">
             Day {dayIndex + 1}: {dayOfWeek}
           </h3>
-          <div className="flex items-center text-sm text-gray-300">
+          <div className="flex items-center text-sm text-gray-500">
             <Calendar className="h-4 w-4 mr-1.5" />
             {monthYear}
           </div>
