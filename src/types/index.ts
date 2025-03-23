@@ -36,6 +36,27 @@ export type TransportationType = {
   selected: boolean;
 };
 
+export type TripMood = {
+  id: string;
+  name: string;
+  icon: string;
+  selected: boolean;
+};
+
+export type TripType = {
+  id: string;
+  name: string;
+  icon: string;
+  selected: boolean;
+};
+
+export type FamilyOptions = {
+  hasPool: boolean;
+  hasConnectedBeds: boolean;
+  hasPlayground: boolean;
+  isChildFriendly: boolean;
+};
+
 export type TravelPreferences = {
   destinations: Destination[];
   dateRange: DateRange;
@@ -43,6 +64,10 @@ export type TravelPreferences = {
   budget: BudgetRange;
   accommodationTypes: AccommodationType[];
   transportationTypes: TransportationType[];
+  mood: TripMood[];
+  tripTypes: TripType[];
+  ageRange: string;
+  familyOptions: FamilyOptions;
 };
 
 export type FormStep = {

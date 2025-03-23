@@ -8,7 +8,10 @@ import {
   Interest, 
   BudgetRange, 
   AccommodationType, 
-  TransportationType
+  TransportationType,
+  TripMood,
+  TripType,
+  FamilyOptions
 } from '@/types';
 
 interface TravelPreferencesContextType {
@@ -21,6 +24,11 @@ interface TravelPreferencesContextType {
   setBudget: (budget: BudgetRange) => void;
   setAccommodationTypes: (types: AccommodationType[]) => void;
   setTransportationTypes: (types: TransportationType[]) => void;
+  setMood: (mood: TripMood[]) => void;
+  setTripType: (tripType: TripType[]) => void;
+  setAgeRange: (ageRange: string) => void;
+  setFamilyOptions: (options: FamilyOptions) => void;
+  handleGenerate: () => Promise<void>;
 }
 
 const defaultTravelPreferences: TravelPreferences = {
@@ -60,7 +68,30 @@ const defaultTravelPreferences: TravelPreferences = {
     { id: '4', name: 'Bus', icon: 'Bus', selected: false },
     { id: '5', name: 'Ferry', icon: 'Ship', selected: false },
     { id: '6', name: 'Walking', icon: 'Footprints', selected: false },
-  ]
+  ],
+  mood: [
+    { id: '1', name: 'Relaxing', icon: 'Coffee', selected: false },
+    { id: '2', name: 'Adventurous', icon: 'Mountain', selected: false },
+    { id: '3', name: 'Romantic', icon: 'Heart', selected: false },
+    { id: '4', name: 'Cultural', icon: 'Globe', selected: false },
+    { id: '5', name: 'Party', icon: 'Music', selected: false },
+  ],
+  tripTypes: [
+    { id: '1', name: 'Family', icon: 'Users', selected: false },
+    { id: '2', name: 'Couples', icon: 'Heart', selected: false },
+    { id: '3', name: 'Solo', icon: 'User', selected: false },
+    { id: '4', name: 'Friends', icon: 'Users', selected: false },
+    { id: '5', name: 'Bachelor/Hen', icon: 'GlassFull', selected: false },
+    { id: '6', name: 'Business', icon: 'Briefcase', selected: false },
+    { id: '7', name: 'Spa', icon: 'Spa', selected: false },
+  ],
+  ageRange: 'all',
+  familyOptions: {
+    hasPool: false,
+    hasConnectedBeds: false,
+    hasPlayground: false,
+    isChildFriendly: false
+  }
 };
 
 export const TravelPreferencesContext = createContext<TravelPreferencesContextType | undefined>(undefined);
@@ -92,6 +123,32 @@ export const TravelPreferencesProvider: React.FC<{ children: React.ReactNode }> 
   const setTransportationTypes = (transportationTypes: TransportationType[]) => {
     setPreferences(prev => ({ ...prev, transportationTypes }));
   };
+  
+  const setMood = (mood: TripMood[]) => {
+    setPreferences(prev => ({ ...prev, mood }));
+  };
+  
+  const setTripType = (tripTypes: TripType[]) => {
+    setPreferences(prev => ({ ...prev, tripTypes }));
+  };
+  
+  const setAgeRange = (ageRange: string) => {
+    setPreferences(prev => ({ ...prev, ageRange }));
+  };
+  
+  const setFamilyOptions = (familyOptions: FamilyOptions) => {
+    setPreferences(prev => ({ ...prev, familyOptions }));
+  };
+  
+  const handleGenerate = async () => {
+    // This will be implemented with the actual generation logic later
+    // For now it's just a placeholder
+    return new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 2000);
+    });
+  };
 
   return (
     <TravelPreferencesContext.Provider 
@@ -105,6 +162,11 @@ export const TravelPreferencesProvider: React.FC<{ children: React.ReactNode }> 
         setBudget,
         setAccommodationTypes,
         setTransportationTypes,
+        setMood,
+        setTripType,
+        setAgeRange,
+        setFamilyOptions,
+        handleGenerate
       }}
     >
       {children}

@@ -1,10 +1,10 @@
 
 import React, { useState } from 'react';
 import { AnimatedCard } from '@/components/ui/AnimatedCard';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Plus, X, MapPin } from 'lucide-react';
 import { Destination } from '@/types';
+import { PlaceAutocomplete } from '@/components/ui/PlaceAutocomplete';
 
 interface DestinationStepProps {
   destinations: Destination[];
@@ -51,11 +51,14 @@ export const DestinationStep: React.FC<DestinationStepProps> = ({
         </div>
 
         <div className="flex gap-2">
-          <Input 
-            placeholder="Add a destination..."
+          <PlaceAutocomplete
             value={newDestination}
-            onChange={(e) => setNewDestination(e.target.value)}
-            onKeyDown={handleKeyDown}
+            onChange={setNewDestination}
+            onPlaceSelect={(place) => {
+              if (place && place.name) {
+                setNewDestination(place.name);
+              }
+            }}
             className="flex-1"
           />
           <Button 
