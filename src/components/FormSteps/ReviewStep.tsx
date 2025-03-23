@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { AnimatedCard } from '@/components/ui/AnimatedCard';
 import { TravelPreferences } from '@/types';
@@ -7,7 +8,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { ApiKeyForm } from '@/components/ApiKeyForm';
+import { ApiKeyManager } from '@/components/ApiKeyManager';
 
 interface ReviewStepProps {
   preferences: TravelPreferences;
@@ -40,6 +41,12 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
   const selectedInterests = interests.filter(interest => interest.selected);
   const selectedAccommodations = accommodationTypes.filter(type => type.selected);
   const selectedTransportations = transportationTypes.filter(type => type.selected);
+  
+  const handleApiKeyChange = (keys: { type: string, value: string }) => {
+    if (keys.type === 'openai' && onApiKeyChange) {
+      onApiKeyChange(keys.value);
+    }
+  };
 
   return (
     <AnimatedCard animation="slide" className="max-w-md mx-auto w-full">
@@ -53,7 +60,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
 
         {onApiKeyChange && (
           <div className="flex justify-center mb-4">
-            <ApiKeyForm onApiKeyChange={onApiKeyChange} />
+            <ApiKeyManager onApiKeysChange={handleApiKeyChange} />
           </div>
         )}
 

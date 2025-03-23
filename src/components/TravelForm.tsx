@@ -6,6 +6,7 @@ import { FormNavigation } from '@/components/FormSteps/FormNavigation';
 import { FormContent } from '@/components/travel-form/FormContent';
 import { TravelPreferencesProvider, useTravelPreferences } from '@/contexts/TravelPreferencesContext';
 import { useFormNavigation, STEPS } from '@/hooks/useFormNavigation';
+import { isOpenAIConfigured } from '@/utils/apiKeys';
 
 const TravelFormContent: React.FC = () => {
   const { preferences, openaiApiKey } = useTravelPreferences();
@@ -40,7 +41,7 @@ const TravelFormContent: React.FC = () => {
         currentStep={currentStep}
         totalSteps={STEPS.length}
         isGenerating={isGenerating}
-        hasApiKey={!!openaiApiKey}
+        hasApiKey={!!openaiApiKey || isOpenAIConfigured()}
         onPrevStep={prevStep}
         onNextStep={nextStep}
         onGenerate={handleGenerateItinerary}
