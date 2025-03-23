@@ -1,6 +1,7 @@
 
 import { TravelPreferences } from '@/types';
 import { GeneratedItineraryContent } from '@/utils/itinerary';
+import { createSlug } from '@/utils/stringUtils';
 
 export const fetchItinerary = async (
   apiKey: string, 
@@ -97,22 +98,33 @@ export const fetchItinerary = async (
         // Try to parse JSON response
         const jsonMatch = content.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
-          return JSON.parse(jsonMatch[0]);
+          const parsedContent = JSON.parse(jsonMatch[0]);
+          // Generate a slug from the title
+          const slug = createSlug(parsedContent.title || `Trip to ${destinationNames}`);
+          
+          return {
+            ...parsedContent,
+            slug
+          };
         } else {
           console.warn('Failed to find JSON in OpenAI response, using raw content instead');
+          const title = `Trip to ${destinationNames}`;
           return {
-            title: `Trip to ${destinationNames}`,
+            title,
             description: `A personalized travel itinerary for ${destinationNames}`,
-            content
+            content,
+            slug: createSlug(title)
           };
         }
       } catch (e) {
         // If parsing fails, log warning and return a structured object with the raw content
         console.warn('Failed to parse JSON response from OpenAI, using plain text instead', e);
+        const title = `Trip to ${destinationNames}`;
         return {
-          title: `Trip to ${destinationNames}`,
+          title,
           description: `A personalized travel itinerary for ${destinationNames}`,
-          content
+          content,
+          slug: createSlug(title)
         };
       }
     }
