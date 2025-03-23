@@ -12,6 +12,7 @@ export const getActivitiesForInterest = (interestName: string) => {
     case 'Beach': return ['Beach relaxation', 'Coastal walks', 'Water activities'];
     case 'Entertainment': return ['Live shows', 'Local festivals', 'Music venues'];
     case 'Photography': return ['Scenic viewpoints', 'Architecture tours', 'Nature photography'];
+    case 'Wine': return ['Wine tasting', 'Vineyard tours', 'Local wineries'];
     default: return ['Sightseeing', 'Local experiences', 'Hidden gems'];
   }
 };
@@ -20,7 +21,19 @@ export const getActivityIcon = (interest: string) => {
   switch (interest) {
     case 'Food & Drink': return 'Utensils';
     case 'Cultural': return 'Map';
+    case 'Adventure': return 'Mountain';
+    case 'Nature': return 'TreePine';
+    case 'Art': return 'Brush';
+    case 'Beach': return 'Waves';
+    case 'Entertainment': return 'Ticket';
     case 'Photography': return 'Camera';
+    case 'Wine': return 'Wine';
     default: return 'Coffee';
   }
+};
+
+export const getRandomTimeSlot = (index: number) => {
+  const baseHours = [8, 10, 12, 14, 16, 18, 20];
+  const hour = baseHours[index % baseHours.length];
+  return `${hour}:00 ${hour < 12 ? 'AM' : 'PM'}`;
 };

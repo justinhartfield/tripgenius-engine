@@ -2,6 +2,7 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { PreviewActivity } from './PreviewActivity';
+import { getActivityIcon } from '@/utils/previewUtils';
 
 interface Activity {
   time: string;
@@ -31,6 +32,7 @@ export const PreviewDay: React.FC<PreviewDayProps> = ({ day, dayIndex }) => {
             time={activity.time}
             activity={activity.activity}
             interest={activity.interest}
+            icon={getActivityIcon(activity.interest)}
             animationDelay={(dayIndex * 0.1) + (actIndex * 0.05)}
           />
         ))}
