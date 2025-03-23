@@ -1,12 +1,12 @@
 
 import React from 'react';
+import { Check, ChevronsRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Check } from 'lucide-react';
 
 interface StepIndicatorProps {
   steps: string[];
   currentStep: number;
-  onStepClick?: (step: number) => void;
+  onStepClick: (step: number) => void;
   className?: string;
 }
 
@@ -14,58 +14,34 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
   steps,
   currentStep,
   onStepClick,
-  className,
+  className
 }) => {
   return (
-    <div className={cn('flex justify-center w-full py-6', className)}>
-      <div className="flex items-center space-x-1 md:space-x-2">
+    <div className={cn("flex items-center justify-center", className)}>
+      <div className="flex items-center space-x-1 sm:space-x-2">
         {steps.map((step, index) => {
+          const isActive = currentStep === index;
           const isCompleted = index < currentStep;
-          const isCurrent = index === currentStep;
           
           return (
-            <React.Fragment key={index}>
-              <div
+            <React.Fragment key={`step-${index}`}>
+              <button
                 className={cn(
-                  'flex flex-col items-center transition-all duration-300',
-                  {
-                    'cursor-pointer': onStepClick && isCompleted,
-                    'opacity-40': !isCompleted && !isCurrent,
-                  }
+                  "flex items-center justify-center rounded-full transition-colors",
+                  "w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm font-medium",
+                  isActive ? "bg-primary text-primary-foreground" : 
+                  isCompleted ? "bg-primary/20 text-primary hover:bg-primary/30" : 
+                  "bg-muted text-muted-foreground hover:bg-muted/80"
                 )}
-                onClick={() => {
-                  if (onStepClick && isCompleted) {
-                    onStepClick(index);
-                  }
-                }}
+                onClick={() => onStepClick(index)}
+                aria-current={isActive ? "step" : undefined}
+                disabled={!isCompleted && !isActive}
               >
-                <div className="hidden md:block text-xs font-medium mb-2 text-center">
-                  {step}
-                </div>
-                <div
-                  className={cn(
-                    'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium border transition-all duration-300',
-                    {
-                      'bg-primary text-primary-foreground border-primary': isCompleted || isCurrent,
-                      'border-border': !isCompleted && !isCurrent,
-                      'scale-110': isCurrent,
-                    }
-                  )}
-                >
-                  {isCompleted ? (
-                    <Check className="w-4 h-4" />
-                  ) : (
-                    <span>{index + 1}</span>
-                  )}
-                </div>
-              </div>
+                {isCompleted ? <Check className="h-4 w-4" /> : index + 1}
+              </button>
               
               {index < steps.length - 1 && (
-                <div
-                  className={cn('h-px w-8 md:w-12 bg-border transition-all duration-300', {
-                    'bg-primary': index < currentStep,
-                  })}
-                />
+                <ChevronsRight className="h-4 w-4 text-muted-foreground" />
               )}
             </React.Fragment>
           );

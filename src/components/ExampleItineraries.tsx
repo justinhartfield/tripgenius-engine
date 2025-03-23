@@ -100,21 +100,51 @@ export const ExampleItineraries: React.FC = () => {
         }))
       };
 
-      // Generate itinerary
-      const itineraryData = await fetchItinerary(openaiApiKey, updatedPreferences, true);
+      // Generate itinerary with improved error handling
+      const itineraryResult = await fetchItinerary(openaiApiKey, updatedPreferences, true);
       
-      // Navigate to the itinerary page
-      if (typeof itineraryData !== 'string' && itineraryData.title) {
-        const slug = slugify(itineraryData.title);
-        navigate(`/itinerary/${slug}`, { 
-          state: { 
-            itineraryData, 
-            preferences: updatedPreferences 
-          } 
-        });
+      // Check if the result is a string (error or unparsed content)
+      let itineraryData;
+      if (typeof itineraryResult === 'string') {
+        // Try to parse JSON if it's a string that may contain JSON
+        try {
+          // Look for JSON-like content in the string
+          const jsonMatch = itineraryResult.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            itineraryData = JSON.parse(jsonMatch[0]);
+          } else {
+            // If no JSON found, create a basic structure
+            itineraryData = {
+              title: `${example.title}`,
+              description: `A ${example.days}-day trip to ${example.destinations.join(', ')}`,
+              content: itineraryResult
+            };
+          }
+        } catch (e) {
+          console.warn('Failed to parse JSON response, creating basic structure', e);
+          // Create basic structure if JSON parsing fails
+          itineraryData = {
+            title: `${example.title}`,
+            description: `A ${example.days}-day trip to ${example.destinations.join(', ')}`,
+            content: itineraryResult
+          };
+        }
       } else {
-        throw new Error('Failed to generate itinerary content');
+        // If it's already an object, use it directly
+        itineraryData = itineraryResult;
       }
+      
+      // Create a slug and navigate
+      const slug = slugify(itineraryData.title || example.title);
+      navigate(`/itinerary/${slug}`, { 
+        state: { 
+          itineraryData: {
+            ...itineraryData,
+            slug
+          }, 
+          preferences: updatedPreferences 
+        } 
+      });
     } catch (error) {
       console.error('Error generating example itinerary:', error);
       toast({

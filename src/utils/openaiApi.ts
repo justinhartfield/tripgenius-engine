@@ -1,3 +1,4 @@
+
 import { TravelPreferences } from '@/types';
 import { GeneratedItineraryContent } from '@/utils/itinerary';
 
@@ -42,7 +43,7 @@ export const fetchItinerary = async (
 
     if (includeSeoContent) {
       prompt += `
-      Please provide your response in JSON format with the following structure:
+      Please provide your response as a clean JSON object with the following structure:
       {
         "title": "An engaging, SEO-friendly title for this trip (max 60 characters)",
         "description": "A compelling meta description summarizing the trip (max 160 characters)",
@@ -94,11 +95,25 @@ export const fetchItinerary = async (
     if (includeSeoContent) {
       try {
         // Try to parse JSON response
-        return JSON.parse(content);
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          return JSON.parse(jsonMatch[0]);
+        } else {
+          console.warn('Failed to find JSON in OpenAI response, using raw content instead');
+          return {
+            title: `Trip to ${destinationNames}`,
+            description: `A personalized travel itinerary for ${destinationNames}`,
+            content
+          };
+        }
       } catch (e) {
-        // If parsing fails, return the content as a string
-        console.warn('Failed to parse JSON response from OpenAI, using plain text instead');
-        return content;
+        // If parsing fails, log warning and return a structured object with the raw content
+        console.warn('Failed to parse JSON response from OpenAI, using plain text instead', e);
+        return {
+          title: `Trip to ${destinationNames}`,
+          description: `A personalized travel itinerary for ${destinationNames}`,
+          content
+        };
       }
     }
     
