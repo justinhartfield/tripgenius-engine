@@ -7,7 +7,7 @@ export const generateItinerary = async (
   preferences: TravelPreferences,
   openaiApiKey: string,
   onStartGenerating: () => void,
-  onFinishGenerating: (result: string | null) => void
+  onFinishGenerating: (result: string | null, preferences: TravelPreferences) => void
 ) => {
   if (!openaiApiKey) {
     toast({
@@ -26,7 +26,7 @@ export const generateItinerary = async (
   
   try {
     const itinerary = await fetchItinerary(openaiApiKey, preferences);
-    onFinishGenerating(itinerary);
+    onFinishGenerating(itinerary, preferences);
     toast({
       title: "Your itinerary is ready!",
       description: "Scroll down to view your personalized travel plan.",
@@ -38,7 +38,7 @@ export const generateItinerary = async (
       description: error instanceof Error ? error.message : "Please check your API key and try again.",
       variant: "destructive",
     });
-    onFinishGenerating(null);
+    onFinishGenerating(null, preferences);
   }
 };
 
