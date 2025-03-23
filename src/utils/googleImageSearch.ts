@@ -16,7 +16,9 @@ export const fetchDestinationImage = async (destination: string): Promise<string
     );
     
     if (!response.ok) {
-      throw new Error('Failed to fetch image from Google');
+      const data = await response.json();
+      console.error('Google API error:', data);
+      throw new Error(`Google API error: ${response.status} - ${data?.error?.message || 'Unknown error'}`);
     }
     
     const data = await response.json();
@@ -28,8 +30,8 @@ export const fetchDestinationImage = async (destination: string): Promise<string
     }
   } catch (error) {
     console.error('Error fetching destination image:', error);
-    // Let the calling component handle the fallback
-    throw error;
+    // Return the default error image path instead of throwing
+    return '/lovable-uploads/33151d87-d1db-4f5a-ac9c-a6c853db8046.png';
   }
 };
 
