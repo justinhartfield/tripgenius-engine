@@ -8,6 +8,7 @@ import { NavigationHeader } from '@/components/NavigationHeader';
 import { useNavigate } from 'react-router-dom';
 import { StreamlinedForm } from '@/components/travel-form/StreamlinedForm';
 import { toast } from 'sonner';
+import { ApiSettingsDialog } from '@/components/ApiSettingsDialog';
 
 const Index: React.FC = () => {
   const navigate = useNavigate();
@@ -67,6 +68,9 @@ const Index: React.FC = () => {
       <HeroSection onGetStarted={handleGetStarted} />
       
       <section id="travel-form" className="py-12 px-4 sm:px-6 lg:px-8 container mx-auto">
+        <div className="flex justify-end mb-4">
+          <ApiSettingsDialog />
+        </div>
         <StreamlinedForm />
       </section>
       
