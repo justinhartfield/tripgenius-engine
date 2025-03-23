@@ -30,8 +30,41 @@ export const fetchItinerary = async (
     // Format budget
     const budgetInfo = `${preferences.budget.min}-${preferences.budget.max} ${preferences.budget.currency}`;
 
+    // Get tour guide style
+    const tourGuideStyle = preferences.tourGuidePreference || 'rick-steves';
+    
+    // Determine the persona for the selected tour guide
+    let tourGuidePersona = '';
+    switch (tourGuideStyle) {
+      case 'rick-steves':
+        tourGuidePersona = "You are Rick Steves, providing budget-friendly, off-the-beaten-path experiences with cultural insights. Focus on affordable accommodations, local restaurants, and meaningful attractions over tourist traps.";
+        break;
+      case 'raver-ricky':
+        tourGuidePersona = "You are Raver Ricky, specializing in vibrant nightlife, music venues, clubs, and party districts. Include cannabis-friendly spots (where legal) and energetic entertainment options.";
+        break;
+      case 'bald-bankrupt':
+        tourGuidePersona = "You are Bald & Bankrupt, focusing on authentic local experiences in less touristy neighborhoods. Showcase the real character of a place, include some gritty areas (while being mindful of safety), and highlight unique cultural encounters.";
+        break;
+      case 'timeout':
+        tourGuidePersona = "You are Timeout Magazine, recommending the trendiest and coolest places in the city - hip neighborhoods, fashionable restaurants, innovative bars, and contemporary cultural spots.";
+        break;
+      case 'monocle':
+        tourGuidePersona = "You are Monocle Magazine, focusing on high-end luxury experiences - premium accommodations, fine dining restaurants, exclusive shopping, and sophisticated cultural attractions.";
+        break;
+      case 'tiger-woods':
+        tourGuidePersona = "You are Tiger Woods, highlighting the best golf experiences in the area - championship courses, golf resorts, equipment shops, and golf-friendly accommodations.";
+        break;
+      case 'lonely-planet':
+        tourGuidePersona = "You are Lonely Planet, recommending adventurous and off-the-beaten-path experiences - hidden gems, nature excursions, local culture immersion, and authentic regional cuisine.";
+        break;
+      default:
+        tourGuidePersona = "You are Rick Steves, providing budget-friendly, off-the-beaten-path experiences with cultural insights. Focus on affordable accommodations, local restaurants, and meaningful attractions over tourist traps.";
+    }
+
     // Construct the prompt
     let prompt = `
+    ${tourGuidePersona}
+
     Create a detailed travel itinerary with the following preferences:
     
     Destinations: ${destinationNames || 'Not specified'}
@@ -41,6 +74,11 @@ export const fetchItinerary = async (
     Accommodation Types: ${selectedAccommodations.length > 0 ? selectedAccommodations.join(', ') : 'Not specified'}
     Transportation Types: ${selectedTransportations.length > 0 ? selectedTransportations.join(', ') : 'Not specified'}
     `;
+
+    // Add personal preferences if provided
+    if (preferences.personalPreferences) {
+      prompt += `\nPersonal Preferences: ${preferences.personalPreferences}`;
+    }
 
     if (includeSeoContent) {
       prompt += `

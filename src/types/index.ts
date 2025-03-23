@@ -68,6 +68,8 @@ export type TravelPreferences = {
   tripTypes: TripType[];
   ageRange: string;
   familyOptions: FamilyOptions;
+  personalPreferences: string;
+  tourGuidePreference: string;
 };
 
 export type FormStep = {

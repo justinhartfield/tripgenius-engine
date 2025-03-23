@@ -3,16 +3,22 @@ import React, { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { PlaceAutocomplete } from '@/components/ui/PlaceAutocomplete';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { 
   Calendar as CalendarIcon, 
   Plus, 
   X, 
   MapPin, 
-  CreditCard, 
-  Settings, 
-  Smile,
-  Users
+  Settings,
+  User,
+  PartyPopper,
+  Skull,
+  Compass,
+  Leaf,
+  Monocle,
+  Golf
 } from 'lucide-react';
 import { 
   Popover, 
@@ -51,16 +57,18 @@ import {
 } from '@/types';
 import { useTravelPreferences } from '@/contexts/TravelPreferencesContext';
 
-// Mood options
-const moodOptions: TripMood[] = [
-  { id: '1', name: 'Relaxing', icon: 'Coffee', selected: false },
-  { id: '2', name: 'Adventurous', icon: 'Mountain', selected: false },
-  { id: '3', name: 'Romantic', icon: 'Heart', selected: false },
-  { id: '4', name: 'Cultural', icon: 'Globe', selected: false },
-  { id: '5', name: 'Party', icon: 'Music', selected: false },
+// Tour Guide options
+const tourGuideOptions = [
+  { id: 'rick-steves', name: 'Rick Steves', icon: 'User', description: 'Cheap and smart yet off the beat choices for sightseeing' },
+  { id: 'raver-ricky', name: 'Raver Ricky', icon: 'PartyPopper', description: 'Party scene/Cannabis scene' },
+  { id: 'bald-bankrupt', name: 'Bald & Bankrupt', icon: 'Skull', description: 'Adventurous areas and local experiences' },
+  { id: 'timeout', name: 'Timeout Magazine', icon: 'Cool', description: 'Coolest Places' },
+  { id: 'monocle', name: 'Monocle Magazine', icon: 'Monocle', description: 'Most luxurious' },
+  { id: 'tiger-woods', name: 'Tiger Woods', icon: 'Golf', description: 'Best places to golf' },
+  { id: 'lonely-planet', name: 'Lonely Planet', icon: 'Leaf', description: 'Adventurers and off the beaten path places' },
 ];
 
-// Trip type options
+// Trip type options - moved to advanced settings
 const tripTypeOptions: TripType[] = [
   { id: '1', name: 'Family', icon: 'Users', selected: false },
   { id: '2', name: 'Couples', icon: 'Heart', selected: false },
@@ -77,16 +85,19 @@ export const StreamlinedForm: React.FC = () => {
     setDestinations, 
     setDateRange, 
     setBudget, 
-    setMood,
     setTripType,
     setFamilyOptions,
     openaiApiKey,
-    handleGenerate
+    handleGenerate,
+    setPersonalPreferences,
+    setTourGuidePreference
   } = useTravelPreferences();
   
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [newDestination, setNewDestination] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [personalNotes, setPersonalNotes] = useState('');
+  const [selectedTourGuide, setSelectedTourGuide] = useState('rick-steves');
   
   const handleDateChange = (range: { from: Date; to: Date }) => {
     if (range.from && range.to) {
@@ -139,15 +150,14 @@ export const StreamlinedForm: React.FC = () => {
     }
   };
   
-  const handleMoodChange = (id: string, checked: boolean) => {
-    const updatedMoods = preferences.mood.map(mood => 
-      mood.id === id ? { ...mood, selected: checked } : mood
-    );
-    setMood(updatedMoods);
+  const handleTourGuideChange = (value: string) => {
+    setSelectedTourGuide(value);
+    setTourGuidePreference(value);
   };
   
-  const handleAgeChange = (age: string) => {
-    // Implementation for age selection
+  const handlePersonalNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setPersonalNotes(e.target.value);
+    setPersonalPreferences(e.target.value);
   };
   
   const handleFamilyOptionChange = (option: keyof typeof preferences.familyOptions, value: boolean) => {
@@ -174,18 +184,32 @@ export const StreamlinedForm: React.FC = () => {
   // Check if family trip type is selected
   const isFamilySelected = preferences.tripTypes.find(t => t.id === '1')?.selected;
   
+  // Icon mapping function
+  const renderTourGuideIcon = (iconName: string) => {
+    switch (iconName) {
+      case 'User': return <User className="h-4 w-4" />;
+      case 'PartyPopper': return <PartyPopper className="h-4 w-4" />;
+      case 'Skull': return <Skull className="h-4 w-4" />;
+      case 'Cool': return <span className="text-sm font-semibold">TO</span>;
+      case 'Monocle': return <Monocle className="h-4 w-4" />;
+      case 'Golf': return <span className="text-sm font-semibold">TW</span>;
+      case 'Leaf': return <Leaf className="h-4 w-4" />;
+      default: return <User className="h-4 w-4" />;
+    }
+  };
+  
   return (
     <div className="max-w-4xl mx-auto">
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>Create Your Travel Itinerary</CardTitle>
-          <CardDescription>Fill in the basics or configure advanced options for a more personalized trip</CardDescription>
+          <CardDescription>Tell us where you want to go and let our AI travel guides create your perfect trip</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
             {/* Destinations */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Destinations</label>
+              <label className="text-sm font-medium">Where do you want to go?</label>
               <div className="flex gap-2">
                 <PlaceAutocomplete
                   value={newDestination}
@@ -232,84 +256,45 @@ export const StreamlinedForm: React.FC = () => {
               )}
             </div>
             
-            {/* Date Range */}
+            {/* Personal Notes */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Travel Dates</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {preferences.dateRange.startDate && preferences.dateRange.endDate ? (
-                      <span>
-                        {format(preferences.dateRange.startDate, 'PPP')} - {format(preferences.dateRange.endDate, 'PPP')}
-                      </span>
-                    ) : (
-                      <span>Select date range</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    initialFocus
-                    mode="range"
-                    defaultMonth={preferences.dateRange.startDate || new Date()}
-                    selected={{
-                      from: preferences.dateRange.startDate || undefined,
-                      to: preferences.dateRange.endDate || undefined
-                    }}
-                    onSelect={(range) => {
-                      if (range?.from && range?.to) {
-                        handleDateChange({ from: range.from, to: range.to });
-                      }
-                    }}
-                    numberOfMonths={2}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            
-            {/* Budget Slider */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <label className="text-sm font-medium">Budget Range</label>
-                <span className="text-sm text-muted-foreground">
-                  {formatCurrency(preferences.budget.min)} - {formatCurrency(preferences.budget.max)}
-                </span>
-              </div>
-              <Slider
-                defaultValue={[preferences.budget.min, preferences.budget.max]}
-                max={10000}
-                step={100}
-                onValueChange={handleBudgetChange}
-                className="w-full"
+              <label className="text-sm font-medium">Tell us what's unique about you or your trip</label>
+              <Textarea
+                placeholder="E.g., I'm traveling with my elderly parents, I love art museums, I want to see live music, etc."
+                value={personalNotes}
+                onChange={handlePersonalNotesChange}
+                className="min-h-[100px]"
               />
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>Budget</span>
-                <span>Luxury</span>
-              </div>
             </div>
             
-            {/* Trip Mood Selection */}
+            {/* Tour Guide Selection */}
             <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <Smile className="h-4 w-4" />
-                Trip Mood
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {preferences.mood.map(mood => (
-                  <Badge 
-                    key={mood.id}
-                    variant={mood.selected ? "default" : "outline"}
-                    className="cursor-pointer"
-                    onClick={() => handleMoodChange(mood.id, !mood.selected)}
+              <label className="text-sm font-medium">Choose your travel guide style</label>
+              <ToggleGroup 
+                type="single" 
+                value={selectedTourGuide}
+                onValueChange={value => value && handleTourGuideChange(value)}
+                className="flex flex-wrap justify-start gap-2"
+              >
+                {tourGuideOptions.map((guide) => (
+                  <ToggleGroupItem 
+                    key={guide.id} 
+                    value={guide.id}
+                    aria-label={guide.name}
+                    className="flex flex-col items-center gap-1 py-2 px-3 h-auto min-w-[80px]"
                   >
-                    {mood.name}
-                  </Badge>
+                    <div className="h-6 w-6 flex items-center justify-center">
+                      {renderTourGuideIcon(guide.icon)}
+                    </div>
+                    <span className="text-xs font-medium">{guide.name}</span>
+                  </ToggleGroupItem>
                 ))}
-              </div>
+              </ToggleGroup>
+              
+              {/* Selected Tour Guide Description */}
+              <p className="text-sm text-muted-foreground mt-2">
+                {tourGuideOptions.find(g => g.id === selectedTourGuide)?.description}
+              </p>
             </div>
             
             {/* Advanced Options Toggle */}
@@ -327,6 +312,72 @@ export const StreamlinedForm: React.FC = () => {
             {/* Advanced Options */}
             {showAdvanced && (
               <Accordion type="single" collapsible className="w-full">
+                {/* Date Range */}
+                <AccordionItem value="date-range">
+                  <AccordionTrigger>Travel Dates</AccordionTrigger>
+                  <AccordionContent>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start text-left font-normal"
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {preferences.dateRange.startDate && preferences.dateRange.endDate ? (
+                            <span>
+                              {format(preferences.dateRange.startDate, 'PPP')} - {format(preferences.dateRange.endDate, 'PPP')}
+                            </span>
+                          ) : (
+                            <span>Select date range</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          initialFocus
+                          mode="range"
+                          defaultMonth={preferences.dateRange.startDate || new Date()}
+                          selected={{
+                            from: preferences.dateRange.startDate || undefined,
+                            to: preferences.dateRange.endDate || undefined
+                          }}
+                          onSelect={(range) => {
+                            if (range?.from && range?.to) {
+                              handleDateChange({ from: range.from, to: range.to });
+                            }
+                          }}
+                          numberOfMonths={2}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* Budget Slider */}
+                <AccordionItem value="budget">
+                  <AccordionTrigger>Budget Range</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">
+                          {formatCurrency(preferences.budget.min)} - {formatCurrency(preferences.budget.max)}
+                        </span>
+                      </div>
+                      <Slider
+                        defaultValue={[preferences.budget.min, preferences.budget.max]}
+                        max={10000}
+                        step={100}
+                        onValueChange={handleBudgetChange}
+                        className="w-full"
+                      />
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Budget</span>
+                        <span>Luxury</span>
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+                
                 {/* Trip Type */}
                 <AccordionItem value="trip-type">
                   <AccordionTrigger>Trip Type</AccordionTrigger>
@@ -357,7 +408,7 @@ export const StreamlinedForm: React.FC = () => {
                 <AccordionItem value="age-range">
                   <AccordionTrigger>Age Range</AccordionTrigger>
                   <AccordionContent>
-                    <Select onValueChange={handleAgeChange} defaultValue={preferences.ageRange}>
+                    <Select onValueChange={(value) => {}} defaultValue={preferences.ageRange}>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select age range" />
                       </SelectTrigger>
