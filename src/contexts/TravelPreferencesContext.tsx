@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState } from 'react';
-import { getStoredApiKey } from '@/utils/openaiApi';
+import { getStoredApiKey, storeApiKey, fetchItinerary } from '@/utils/openaiApi';
 import { 
   TravelPreferences, 
   Destination, 
@@ -13,6 +13,9 @@ import {
   TripType,
   FamilyOptions
 } from '@/types';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { slugify } from '@/utils/stringUtils';
 
 interface TravelPreferencesContextType {
   preferences: TravelPreferences;
@@ -28,6 +31,8 @@ interface TravelPreferencesContextType {
   setTripType: (tripType: TripType[]) => void;
   setAgeRange: (ageRange: string) => void;
   setFamilyOptions: (options: FamilyOptions) => void;
+  setPersonalPreferences: (prefs: string) => void;
+  setTourGuidePreference: (guide: string) => void;
   handleGenerate: () => Promise<void>;
 }
 
@@ -91,7 +96,9 @@ const defaultTravelPreferences: TravelPreferences = {
     hasConnectedBeds: false,
     hasPlayground: false,
     isChildFriendly: false
-  }
+  },
+  personalPreferences: '',
+  tourGuidePreference: 'rick-steves'
 };
 
 export const TravelPreferencesContext = createContext<TravelPreferencesContextType | undefined>(undefined);
@@ -99,6 +106,8 @@ export const TravelPreferencesContext = createContext<TravelPreferencesContextTy
 export const TravelPreferencesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [preferences, setPreferences] = useState<TravelPreferences>(defaultTravelPreferences);
   const [openaiApiKey, setOpenaiApiKey] = useState(getStoredApiKey());
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const setDestinations = (destinations: Destination[]) => {
     setPreferences(prev => ({ ...prev, destinations }));
@@ -140,14 +149,61 @@ export const TravelPreferencesProvider: React.FC<{ children: React.ReactNode }> 
     setPreferences(prev => ({ ...prev, familyOptions }));
   };
   
+  const setPersonalPreferences = (personalPreferences: string) => {
+    setPreferences(prev => ({ ...prev, personalPreferences }));
+  };
+  
+  const setTourGuidePreference = (tourGuidePreference: string) => {
+    setPreferences(prev => ({ ...prev, tourGuidePreference }));
+  };
+  
   const handleGenerate = async () => {
-    // This will be implemented with the actual generation logic later
-    // For now it's just a placeholder
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, 2000);
-    });
+    if (!openaiApiKey) {
+      toast({
+        title: "API Key Required",
+        description: "Please set your OpenAI API key in the settings before generating an itinerary.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (preferences.destinations.length === 0) {
+      toast({
+        title: "Destination Required",
+        description: "Please add at least one destination for your trip.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      toast({
+        title: "Generating Itinerary",
+        description: "Creating your custom travel itinerary...",
+      });
+
+      // Generate itinerary with SEO content
+      const itineraryResult = await fetchItinerary(openaiApiKey, preferences, true);
+      
+      if (typeof itineraryResult !== 'string') {
+        // Navigate to the itinerary page
+        navigate(`/itinerary/${itineraryResult.slug}`, { 
+          state: { 
+            itineraryData: itineraryResult,
+            preferences 
+          } 
+        });
+      } else {
+        throw new Error('Failed to generate proper itinerary format');
+      }
+    } catch (error) {
+      console.error('Error generating itinerary:', error);
+      toast({
+        title: "Generation Failed",
+        description: (error as Error).message || "There was an error generating your itinerary. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -166,6 +222,8 @@ export const TravelPreferencesProvider: React.FC<{ children: React.ReactNode }> 
         setTripType,
         setAgeRange,
         setFamilyOptions,
+        setPersonalPreferences,
+        setTourGuidePreference,
         handleGenerate
       }}
     >

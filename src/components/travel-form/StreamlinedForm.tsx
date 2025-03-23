@@ -16,9 +16,9 @@ import {
   PartyPopper,
   Skull,
   Compass,
-  Leaf,
-  Monocle,
-  Golf
+  Glasses,
+  GolfIcon,
+  Leaf
 } from 'lucide-react';
 import { 
   Popover, 
@@ -63,8 +63,8 @@ const tourGuideOptions = [
   { id: 'raver-ricky', name: 'Raver Ricky', icon: 'PartyPopper', description: 'Party scene/Cannabis scene' },
   { id: 'bald-bankrupt', name: 'Bald & Bankrupt', icon: 'Skull', description: 'Adventurous areas and local experiences' },
   { id: 'timeout', name: 'Timeout Magazine', icon: 'Cool', description: 'Coolest Places' },
-  { id: 'monocle', name: 'Monocle Magazine', icon: 'Monocle', description: 'Most luxurious' },
-  { id: 'tiger-woods', name: 'Tiger Woods', icon: 'Golf', description: 'Best places to golf' },
+  { id: 'monocle', name: 'Monocle Magazine', icon: 'Glasses', description: 'Most luxurious' },
+  { id: 'tiger-woods', name: 'Tiger Woods', icon: 'GolfIcon', description: 'Best places to golf' },
   { id: 'lonely-planet', name: 'Lonely Planet', icon: 'Leaf', description: 'Adventurers and off the beaten path places' },
 ];
 
@@ -191,8 +191,8 @@ export const StreamlinedForm: React.FC = () => {
       case 'PartyPopper': return <PartyPopper className="h-4 w-4" />;
       case 'Skull': return <Skull className="h-4 w-4" />;
       case 'Cool': return <span className="text-sm font-semibold">TO</span>;
-      case 'Monocle': return <Monocle className="h-4 w-4" />;
-      case 'Golf': return <span className="text-sm font-semibold">TW</span>;
+      case 'Glasses': return <Glasses className="h-4 w-4" />;
+      case 'GolfIcon': return <GolfIcon className="h-4 w-4" />;
       case 'Leaf': return <Leaf className="h-4 w-4" />;
       default: return <User className="h-4 w-4" />;
     }
