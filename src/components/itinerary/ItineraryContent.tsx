@@ -39,6 +39,16 @@ export const ItineraryContent: React.FC<ItineraryContentProps> = ({
       }
     }
 
+    // Clean up markdown formatting issues
+    cleanContent = cleanContent
+      .replace(/\n\n###/g, '\n###') // Fix triple hash spacing
+      .replace(/\n\n##/g, '\n##') // Fix double hash spacing
+      .replace(/\n\n#/g, '\n#') // Fix hash spacing
+      .replace(/\\\n/g, '\n') // Replace escaped newlines with actual newlines
+      .replace(/\\n/g, '\n') // Replace \n with newlines
+      .replace(/\\\*/g, '*') // Replace escaped asterisks
+      .replace(/\\/g, ''); // Remove any remaining backslashes
+
     // Convert markdown to HTML using marked
     const html = marked.parse(cleanContent, { async: false }) as string;
     
@@ -50,10 +60,10 @@ export const ItineraryContent: React.FC<ItineraryContentProps> = ({
 
   if (parsedDays.length > 0) {
     return (
-      <div ref={contentRef} className="space-y-8 py-6">
-        <div className="flex items-center justify-center gap-2 mb-6">
-          <CalendarClock className="h-5 w-5 text-primary" />
-          <h3 className="text-xl font-medium text-center">Your Day-by-Day Itinerary</h3>
+      <div ref={contentRef} className="space-y-6 py-6">
+        <div className="flex items-center justify-center gap-2 mb-8">
+          <CalendarClock className="h-6 w-6 text-primary" />
+          <h2 className="text-2xl font-semibold text-center">Your Day-by-Day Itinerary</h2>
         </div>
         
         {parsedDays.map((day, index) => (

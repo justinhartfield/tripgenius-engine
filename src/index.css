@@ -85,18 +85,22 @@
 .markdown-content h2, 
 .markdown-content h3, 
 .markdown-content h4 {
-  @apply font-bold mb-2 mt-4;
+  @apply font-bold mt-8 mb-4;
 }
 
 .markdown-content h1 {
-  @apply text-2xl;
+  @apply text-3xl border-b pb-2;
 }
 
 .markdown-content h2 {
-  @apply text-xl;
+  @apply text-2xl border-b pb-1 pt-2;
 }
 
 .markdown-content h3 {
+  @apply text-xl;
+}
+
+.markdown-content h4 {
   @apply text-lg;
 }
 
@@ -110,7 +114,7 @@
 }
 
 .markdown-content li {
-  @apply mb-1;
+  @apply mb-2;
 }
 
 .markdown-content a {
@@ -144,4 +148,9 @@
 
 .markdown-content th {
   @apply bg-gray-100;
+}
+
+/* Whitespace formatting */
+.whitespace-pre-line {
+  white-space: pre-line;
 }

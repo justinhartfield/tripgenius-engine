@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { 
   Coffee, Utensils, Camera, Map, Clock, 
-  ChevronDown, ChevronUp, Icon
+  ChevronDown, ChevronUp
 } from 'lucide-react';
 import { 
   Accordion,
@@ -30,7 +30,24 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
   description = "Perfect for your travel style and preferences.",
   thumbnail
 }) => {
-  const [expanded, setExpanded] = useState(false);
+  // Format the activity text by cleaning up any HTML or markdown artifacts
+  const formatActivityText = (text: string) => {
+    return text
+      .replace(/\\\n/g, '\n') // Replace escaped newlines with actual newlines
+      .replace(/\\n/g, '\n') // Replace \n with newlines
+      .replace(/\n\n###/g, '\n###') // Fix triple hash spacing
+      .replace(/\n\n##/g, '\n##') // Fix double hash spacing
+      .replace(/\n\n#/g, '\n#') // Fix hash spacing
+      .replace(/\*\*/g, '') // Remove bold markdown
+      .replace(/\\\*/g, '*') // Replace escaped asterisks
+      .replace(/\\/g, '') // Remove any remaining backslashes
+      .replace(/\n###\s?/g, '\n') // Remove ### headers
+      .replace(/\n##\s?/g, '\n') // Remove ## headers
+      .replace(/\n#\s?/g, '\n') // Remove # headers
+      .replace(/\|\n\|/g, '\n') // Fix table formatting
+  };
+  
+  const formattedActivity = formatActivityText(activity);
   
   const getIconComponent = () => {
     switch (icon) {
@@ -72,7 +89,7 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
                 <div className="mr-3 flex-shrink-0">
                   <img 
                     src={thumbnail} 
-                    alt={activity}
+                    alt={formattedActivity}
                     className="w-12 h-12 object-cover rounded-md" 
                     onError={(e) => {
                       e.currentTarget.src = '/lovable-uploads/33151d87-d1db-4f5a-ac9c-a6c853db8046.png';
@@ -83,13 +100,19 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
               
               <div className="flex-1">
                 <div className="flex items-start justify-between">
-                  <div>
-                    <h4 className="font-medium text-sm">{activity}</h4>
-                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{description}</p>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-sm">
+                      {formattedActivity.split('\n')[0]}
+                    </h4>
+                    {formattedActivity.split('\n').length > 1 && (
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                        {formattedActivity.split('\n').slice(1).join(' ').trim()}
+                      </p>
+                    )}
                   </div>
                   
-                  <div className="flex items-center">
-                    <span className="text-xs bg-primary/10 text-primary rounded-full px-2 py-0.5 mr-2">
+                  <div className="flex items-center flex-shrink-0 ml-2">
+                    <span className="text-xs bg-primary/10 text-primary rounded-full px-2 py-0.5 mr-2 whitespace-nowrap">
                       {interest}
                     </span>
                     <div className="bg-primary/10 text-primary rounded-full p-1.5">
@@ -105,7 +128,12 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
             </AccordionTrigger>
             
             <AccordionContent className="px-3 pb-3 text-sm">
-              <p className="text-gray-700">{description}</p>
+              <div className="text-gray-700 whitespace-pre-line">
+                {formattedActivity.split('\n').length > 1 
+                  ? formattedActivity
+                  : description
+                }
+              </div>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
