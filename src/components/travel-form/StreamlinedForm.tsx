@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Slider } from '@/components/ui/slider';
@@ -17,7 +16,7 @@ import {
   Skull,
   Compass,
   Glasses,
-  GolfIcon,
+  Golf,
   Leaf
 } from 'lucide-react';
 import { 
@@ -64,7 +63,7 @@ const tourGuideOptions = [
   { id: 'bald-bankrupt', name: 'Bald & Bankrupt', icon: 'Skull', description: 'Adventurous areas and local experiences' },
   { id: 'timeout', name: 'Timeout Magazine', icon: 'Cool', description: 'Coolest Places' },
   { id: 'monocle', name: 'Monocle Magazine', icon: 'Glasses', description: 'Most luxurious' },
-  { id: 'tiger-woods', name: 'Tiger Woods', icon: 'GolfIcon', description: 'Best places to golf' },
+  { id: 'tiger-woods', name: 'Tiger Woods', icon: 'Golf', description: 'Best places to golf' },
   { id: 'lonely-planet', name: 'Lonely Planet', icon: 'Leaf', description: 'Adventurers and off the beaten path places' },
 ];
 
@@ -192,7 +191,7 @@ export const StreamlinedForm: React.FC = () => {
       case 'Skull': return <Skull className="h-4 w-4" />;
       case 'Cool': return <span className="text-sm font-semibold">TO</span>;
       case 'Glasses': return <Glasses className="h-4 w-4" />;
-      case 'GolfIcon': return <GolfIcon className="h-4 w-4" />;
+      case 'Golf': return <Golf className="h-4 w-4" />;
       case 'Leaf': return <Leaf className="h-4 w-4" />;
       default: return <User className="h-4 w-4" />;
     }
