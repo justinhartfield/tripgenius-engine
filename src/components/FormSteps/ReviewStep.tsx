@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { AnimatedCard } from '@/components/ui/AnimatedCard';
 import { TravelPreferences } from '@/types';
@@ -8,13 +7,18 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { ApiKeyForm } from '@/components/ApiKeyForm';
 
 interface ReviewStepProps {
   preferences: TravelPreferences;
+  onApiKeyChange?: (apiKey: string) => void;
+  apiKeyConfigured?: boolean;
 }
 
 export const ReviewStep: React.FC<ReviewStepProps> = ({
   preferences,
+  onApiKeyChange,
+  apiKeyConfigured
 }) => {
   const { 
     destinations, 
@@ -46,6 +50,12 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
             Check that everything looks right before generating your itinerary.
           </p>
         </div>
+
+        {onApiKeyChange && (
+          <div className="flex justify-center mb-4">
+            <ApiKeyForm onApiKeyChange={onApiKeyChange} />
+          </div>
+        )}
 
         <div className="space-y-4">
           <div className="space-y-2">
