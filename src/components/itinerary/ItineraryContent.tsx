@@ -4,7 +4,7 @@ import DOMPurify from 'dompurify';
 import { marked } from 'marked';
 import { CalendarClock } from 'lucide-react';
 import { TravelPreferences } from '@/types';
-import { parseItineraryDays } from '@/utils/itineraryUtils';
+import { parseItineraryDays } from '@/utils/itinerary';
 import { PreviewDay } from './PreviewDay';
 
 interface ItineraryContentProps {

@@ -1,9 +1,8 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { TravelPreferences } from '@/types';
-import { validateStep, generateItinerary, GeneratedItineraryContent } from '@/utils/itineraryUtils';
+import { validateStep, generateItinerary, GeneratedItineraryContent } from '@/utils/itinerary';
 
 export const STEPS = [
   'Destination',
