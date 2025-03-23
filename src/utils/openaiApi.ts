@@ -1,5 +1,5 @@
 import { TravelPreferences } from '@/types';
-import { GeneratedItineraryContent } from './itineraryUtils';
+import { GeneratedItineraryContent } from '@/utils/itinerary';
 
 export const fetchItinerary = async (
   apiKey: string, 

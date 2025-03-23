@@ -4,7 +4,7 @@ import { useLocation, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { ItineraryDisplay } from '@/components/ItineraryDisplay';
 import { TravelPreferences } from '@/types';
-import { GeneratedItineraryContent } from '@/utils/itineraryUtils';
+import { GeneratedItineraryContent } from '@/utils/itinerary';
 import { fetchDestinationImage } from '@/utils/googleImageSearch';
 import { ItineraryHeader } from '@/components/itinerary/ItineraryHeader';
 import { ItineraryLoading } from '@/components/itinerary/ItineraryLoading';
