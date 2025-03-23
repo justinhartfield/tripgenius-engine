@@ -2,6 +2,7 @@
 import { TravelPreferences } from '@/types';
 import { toast } from '@/components/ui/use-toast';
 import { fetchItinerary } from '@/utils/openaiApi';
+import { slugify } from '@/utils/stringUtils';
 
 export interface GeneratedItineraryContent {
   title: string;
@@ -34,14 +35,14 @@ export const generateItinerary = async (
   try {
     const itineraryData = await fetchItinerary(openaiApiKey, preferences, true);
     
-    // Create a slug from the title
+    // Create a slug from the title using slugify instead of createSlug
     let slug = '';
     if (typeof itineraryData === 'object' && itineraryData.title) {
-      slug = createSlug(itineraryData.title);
+      slug = slugify(itineraryData.title);
     } else {
       // Create a basic slug from destinations if no title is available
       const mainDestination = preferences.destinations[0]?.name || 'travel';
-      slug = createSlug(`Trip to ${mainDestination}`);
+      slug = slugify(`Trip to ${mainDestination}`);
     }
     
     const result = typeof itineraryData === 'string' 
@@ -67,16 +68,6 @@ export const generateItinerary = async (
     });
     onFinishGenerating(null, preferences);
   }
-};
-
-// Helper function to create SEO-friendly URL slugs
-export const createSlug = (text: string): string => {
-  return text
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, '') // Remove special characters
-    .replace(/\s+/g, '-')     // Replace spaces with hyphens
-    .replace(/-+/g, '-')      // Remove consecutive hyphens
-    .trim();                  // Trim leading/trailing spaces
 };
 
 // Helper function to get duration text

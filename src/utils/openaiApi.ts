@@ -1,7 +1,7 @@
 
 import { TravelPreferences } from '@/types';
 import { GeneratedItineraryContent } from '@/utils/itinerary';
-import { createSlug } from '@/utils/stringUtils';
+import { slugify } from '@/utils/stringUtils';
 
 export const fetchItinerary = async (
   apiKey: string, 
@@ -99,8 +99,8 @@ export const fetchItinerary = async (
         const jsonMatch = content.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           const parsedContent = JSON.parse(jsonMatch[0]);
-          // Generate a slug from the title
-          const slug = createSlug(parsedContent.title || `Trip to ${destinationNames}`);
+          // Generate a slug from the title using slugify instead of createSlug
+          const slug = slugify(parsedContent.title || `Trip to ${destinationNames}`);
           
           return {
             ...parsedContent,
@@ -113,7 +113,7 @@ export const fetchItinerary = async (
             title,
             description: `A personalized travel itinerary for ${destinationNames}`,
             content,
-            slug: createSlug(title)
+            slug: slugify(title)
           };
         }
       } catch (e) {
@@ -124,7 +124,7 @@ export const fetchItinerary = async (
           title,
           description: `A personalized travel itinerary for ${destinationNames}`,
           content,
-          slug: createSlug(title)
+          slug: slugify(title)
         };
       }
     }
