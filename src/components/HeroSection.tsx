@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowRight, MapPin, Calendar, Star, CreditCard, Ship } from 'lucide-react';
+import { ArrowRight, MapPin, Calendar, Users, User, UsersRound } from 'lucide-react';
 import { BlurredOverlay } from '@/components/ui/BlurredOverlay';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -23,17 +23,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
       <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center z-10">
         <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-primary mb-6 animate-fade-in">
-          <span>Discover your perfect journey</span>
+          <span>Your personalized travel planner</span>
         </div>
         
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight max-w-3xl animate-fade-in" style={{ animationDelay: '0.1s' }}>
-          <span className="block">Create your dream trip with</span>
+          <span className="block">Plan your perfect trip with</span>
           <span className="text-primary">TripGenius</span>
         </h1>
         
         <p className="mt-6 text-lg text-muted-foreground max-w-xl animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          Effortlessly plan personalized itineraries tailored to your preferences. 
-          Let AI craft the perfect travel experience just for you.
+          Tell us who you are, where you're going, and when - and we'll create 
+          a personalized itinerary just for you.
         </p>
         
         <div className="mt-10 animate-fade-in" style={{ animationDelay: '0.3s' }}>
@@ -42,28 +42,27 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             size="lg" 
             className="px-8 py-6 rounded-full text-md transition-all duration-300 bg-primary hover:bg-primary/90"
           >
-            <span>Get Started</span>
+            <span>Start Planning</span>
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 w-full max-w-3xl">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mt-16 w-full max-w-3xl">
           {[
-            { icon: MapPin, title: 'Destinations', description: 'Choose from anywhere in the world' },
-            { icon: Calendar, title: 'Travel Dates', description: 'Plan for any time period' },
-            { icon: Star, title: 'Preferences', description: 'Tailored to your interests' },
-            { icon: Ship, title: 'Complete Plan', description: 'All details taken care of' },
+            { icon: User, title: 'I\'m a solo traveler', description: 'Solo adventures tailored for you' },
+            { icon: Users, title: 'We\'re a family', description: 'Fun for everyone, big and small' },
+            { icon: UsersRound, title: 'We\'re a group', description: 'Perfect activities for your crew' },
           ].map((feature, i) => (
             <BlurredOverlay
               key={i}
-              className="p-4 flex flex-col items-center text-center animate-scale-in"
+              className="p-5 flex flex-col items-center text-center animate-scale-in hover:bg-primary/5 cursor-pointer transition-all"
               style={{ animationDelay: `${0.4 + i * 0.1}s` }}
             >
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-                <feature.icon className="h-5 w-5 text-primary" />
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <feature.icon className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="font-medium text-sm">{feature.title}</h3>
-              <p className="text-xs text-muted-foreground mt-1">{feature.description}</p>
+              <h3 className="font-medium text-sm mb-1">{feature.title}</h3>
+              <p className="text-xs text-muted-foreground">{feature.description}</p>
             </BlurredOverlay>
           ))}
         </div>
