@@ -4,15 +4,17 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { fetchItinerary } from '@/utils/openaiApi';
 import { ItineraryHeader } from '@/components/itinerary/ItineraryHeader';
 import { ItinerarySection } from '@/components/itinerary/ItinerarySection';
+import { ItineraryContent } from '@/components/itinerary/ItineraryContent';
 import { TravelPreferences } from '@/types';
 import { useToast } from "@/hooks/use-toast";
 import { Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Badge } from "@/components/ui/badge"
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 import { generateShareableLink } from '@/utils/linkGenerator';
 import { saveItinerary } from '@/utils/supabase';
+import { parseItineraryDays } from '@/utils/itinerary';
 
 interface LocationState {
   itineraryData?: any;
@@ -113,7 +115,9 @@ const ItineraryPage: React.FC = () => {
     }
 
     try {
-      const shareableLink = await generateShareableLink(itineraryData.id || slug || 'default-id');
+      const idToShare = itineraryData.id || slug || 'default-id';
+      const shareableLink = await generateShareableLink(idToShare);
+      
       if (shareableLink) {
         navigator.clipboard.writeText(shareableLink);
         setCopySuccess(true);
@@ -139,6 +143,31 @@ const ItineraryPage: React.FC = () => {
     navigate('/plans');
   };
 
+  const handleCopyText = () => {
+    if (itineraryData) {
+      const content = typeof itineraryData === 'string' 
+        ? itineraryData 
+        : itineraryData.content || JSON.stringify(itineraryData);
+      
+      navigator.clipboard.writeText(content);
+      toast({
+        title: "Copied to Clipboard",
+        description: "Itinerary text has been copied to your clipboard.",
+      });
+    }
+  };
+
+  const getItineraryContent = () => {
+    if (typeof itineraryData === 'string') {
+      return itineraryData;
+    } else if (itineraryData?.content) {
+      return itineraryData.content;
+    } else if (itineraryData?.sections && Array.isArray(itineraryData.sections)) {
+      return itineraryData.sections.map((s: any) => s.content).join('\n\n');
+    }
+    return '';
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <ItineraryHeader 
@@ -149,37 +178,46 @@ const ItineraryPage: React.FC = () => {
         saveApiKeys={saveApiKeys}
         handleShare={handleShare}
         onBrowsePlans={handleBrowsePlans}
-        itineraryContent={itineraryData?.content}
+        itineraryContent={getItineraryContent()}
+        onCopyText={handleCopyText}
       />
       
       {loading ? (
-        <div className="text-center">Loading itinerary...</div>
-      ) : itineraryData ? (
-        <ScrollArea className="h-[700px] w-full rounded-md border">
-          <div ref={contentRef} className="space-y-4 p-4">
-            {itineraryData.sections && itineraryData.sections.length > 0 ? (
-              itineraryData.sections.map((section: any) => (
-                <ItinerarySection key={section.id} section={section} />
-              ))
-            ) : (
-              <div className="p-6 bg-white/70 rounded-lg shadow-md">
-                <h3 className="text-xl font-medium mb-4 text-blue-800">Your Itinerary</h3>
-                <div className="prose prose-blue max-w-none">
-                  {typeof itineraryData === 'string' ? (
-                    <p>{itineraryData}</p>
-                  ) : itineraryData.content ? (
-                    <p>{itineraryData.content}</p>
-                  ) : (
-                    <p>No content available for this itinerary.</p>
-                  )}
-                </div>
-              </div>
-            )}
+        <div className="flex items-center justify-center p-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-lg font-medium">Loading your itinerary...</p>
           </div>
-        </ScrollArea>
+        </div>
+      ) : itineraryData ? (
+        <div className="bg-white/95 backdrop-blur-sm shadow-lg rounded-xl border overflow-hidden">
+          {itineraryData.sections && itineraryData.sections.length > 0 ? (
+            <ScrollArea className="h-[700px] w-full p-6">
+              <div className="space-y-6" ref={contentRef}>
+                {itineraryData.sections.map((section: any, index: number) => (
+                  <ItinerarySection key={index} section={section} />
+                ))}
+              </div>
+            </ScrollArea>
+          ) : (
+            <ScrollArea className="h-[700px] w-full">
+              <ItineraryContent 
+                itinerary={getItineraryContent()}
+                contentRef={contentRef}
+                travelPreferences={preferences}
+              />
+            </ScrollArea>
+          )}
+        </div>
       ) : (
-        <div className="text-center">
-          No itinerary data found. Please generate an itinerary first.
+        <div className="text-center p-12 bg-white/80 rounded-xl shadow-md">
+          <p className="text-lg text-gray-600">No itinerary data found. Please generate an itinerary first.</p>
+          <Button 
+            className="mt-4" 
+            onClick={() => navigate('/')}
+          >
+            Create New Itinerary
+          </Button>
         </div>
       )}
     </div>

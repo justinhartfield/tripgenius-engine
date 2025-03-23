@@ -8,3 +8,5 @@ export * from './ItineraryNotFound';
 export * from './CalendarExport';
 export * from './ItinerarySection';
 export * from './ApiSettingsDialog';
+export * from './ItineraryContent';
+export * from './PreviewActivity';
