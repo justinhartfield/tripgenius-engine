@@ -6,3 +6,5 @@ export * from './ItineraryHeader';
 export * from './ItineraryLoading';
 export * from './ItineraryNotFound';
 export * from './CalendarExport';
+export * from './ActivityTimeSection';
+export * from './types';
