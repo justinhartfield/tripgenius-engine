@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Coffee, Utensils, Camera, Map, Brush, Waves, Ticket, TreePine, Wine, Mountain 
@@ -208,18 +207,18 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
     }
   };
 
-  // Format the time display to eliminate duplicates and numbers
+  // Process the time for display, making sure to show it on each card
   const formatTimeDisplay = () => {
-    // Remove any standalone numbers
+    // If it's a standalone number, format it with proper time display
     if (/^\d+$/.test(time.trim())) {
-      return "";
+      const hour = parseInt(time.trim());
+      return hour < 12 ? `${hour}:00 AM` : `${hour === 12 ? 12 : hour - 12}:00 PM`;
     }
     
-    // If the time includes the time of day word (morning, afternoon, evening),
-    // don't display it as it's redundant with the section heading
-    const timeOfDay = getTimeOfDayLabel();
-    if (time.toLowerCase().includes(timeOfDay.toLowerCase())) {
-      return "";
+    // Check if it's just a word like "Morning", "Afternoon", etc.
+    const timeWords = ["morning", "afternoon", "evening", "night", "breakfast", "lunch", "dinner"];
+    if (timeWords.some(word => time.toLowerCase() === word)) {
+      return time.charAt(0).toUpperCase() + time.slice(1);
     }
     
     return time;
@@ -229,16 +228,10 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
 
   return (
     <div 
-      className="animate-fade-in mb-6" 
+      className="animate-fade-in mb-5" 
       style={{ animationDelay: `${animationDelay}s` }}
     >
       <div className="flex items-start gap-3">
-        {displayTime && (
-          <div className="flex-shrink-0 w-12 text-center">
-            <span className="itinerary-time-label">{displayTime}</span>
-          </div>
-        )}
-        
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="item-1" className={`itinerary-activity-card ${getBubbleColor()}`}>
             <div className="flex p-4">
@@ -258,11 +251,16 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
               <div className="flex-1">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h4 className="font-medium text-base">
+                    {displayTime && (
+                      <div className="text-sm font-medium mb-1 text-gray-600">
+                        {displayTime}
+                      </div>
+                    )}
+                    <h4 className="font-semibold text-base">
                       {formattedActivity.split('\n')[0]}
                     </h4>
                     {formattedActivity.split('\n').length > 1 && (
-                      <p className="text-sm mt-1 line-clamp-1">
+                      <p className="text-sm mt-1 line-clamp-1 text-gray-700">
                         {formattedActivity.split('\n').slice(1).join(' ').trim()}
                       </p>
                     )}

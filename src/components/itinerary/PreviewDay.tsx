@@ -39,7 +39,7 @@ export const PreviewDay: React.FC<PreviewDayProps> = ({
   
   return (
     <div className="space-y-2 animate-fade-in backdrop-blur-sm bg-white/40 rounded-xl p-6 shadow-glass" style={{ animationDelay: `${dayIndex * 0.1}s` }}>
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-8">
         <div className="itinerary-day-indicator bg-primary/10 shadow-sm">
           <div>
             <div className="text-sm text-primary font-medium">{monthShort}</div>
@@ -48,21 +48,21 @@ export const PreviewDay: React.FC<PreviewDayProps> = ({
         </div>
         
         <div className="flex-1">
-          <h3 className="font-semibold text-xl">
+          <h2 className="font-bold text-2xl text-gray-800">
             Day {dayIndex + 1}: {dayOfWeek}
-          </h3>
-          <div className="flex items-center text-sm text-gray-500">
+          </h2>
+          <div className="flex items-center text-sm text-gray-500 mt-1">
             <Calendar className="h-4 w-4 mr-1.5" />
             {monthYear}
           </div>
         </div>
       </div>
       
-      <div className="border-l-2 border-primary/30 pl-[calc(0.75rem+12px)] ml-8 pt-2">
+      <div className="border-l-2 border-primary/30 pl-[calc(0.75rem+12px)] ml-6 pt-2">
         {/* Morning Activities */}
         <ActivityTimeSection
           activities={morning}
-          icon={<Sun className="h-4 w-4 text-orange-500 mr-2" />}
+          icon={<Sun className="h-5 w-5 text-orange-500" />}
           title="MORNING"
           titleColor="text-orange-600"
           borderColor="border-orange-200"
@@ -75,7 +75,7 @@ export const PreviewDay: React.FC<PreviewDayProps> = ({
         {/* Afternoon Activities */}
         <ActivityTimeSection
           activities={afternoon}
-          icon={<Cloud className="h-4 w-4 text-green-500 mr-2" />}
+          icon={<Cloud className="h-5 w-5 text-green-500" />}
           title="AFTERNOON"
           titleColor="text-green-600"
           borderColor="border-green-200"
@@ -88,7 +88,7 @@ export const PreviewDay: React.FC<PreviewDayProps> = ({
         {/* Evening Activities */}
         <ActivityTimeSection
           activities={evening}
-          icon={<Moon className="h-4 w-4 text-purple-500 mr-2" />}
+          icon={<Moon className="h-5 w-5 text-purple-500" />}
           title="EVENING"
           titleColor="text-purple-600"
           borderColor="border-purple-200"

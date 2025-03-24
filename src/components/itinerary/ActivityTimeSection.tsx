@@ -18,14 +18,14 @@ export const ActivityTimeSection: React.FC<ActivitySectionProps> = ({
   if (activities.length === 0) return null;
   
   return (
-    <div className="mb-4">
-      <div className="flex items-center mb-3">
+    <div className="mb-6">
+      <div className="flex items-center mb-4">
         <div className="flex items-center">
           {icon}
-          <h4 className={`text-sm font-semibold ${titleColor} ml-2`}>{title}</h4>
+          <h3 className={`text-lg font-bold ${titleColor} ml-2 tracking-wide`}>{title}</h3>
         </div>
       </div>
-      <div className={`pl-2 border-l-2 ${borderColor}`}>
+      <div className={`pl-4 border-l-2 ${borderColor}`}>
         {activities.map((activity, actIndex) => (
           <PreviewActivity
             key={`${title.toLowerCase()}-${actIndex}`}
