@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 /**
@@ -54,18 +55,9 @@ export const addHyperlinksToActivityText = (text: string): React.ReactNode => {
   const titleWithLink = React.createElement(
     'div',
     { className: "font-semibold text-primary mb-2" },
-    React.createElement(
-      'a',
-      {
-        href: getLocationUrl(titleLine),
-        target: "_blank",
-        rel: "noopener noreferrer",
-        className: "hover:underline"
-      },
-      titleLine
-    )
+    titleLine
   );
-  
+
   // Process the rest of the text to find potential venue references
   if (!restOfText) return titleWithLink;
   
@@ -84,78 +76,50 @@ export const addHyperlinksToActivityText = (text: string): React.ReactNode => {
     /\b(The\s+)?([A-Z][a-zA-Z']+(\s+[A-Z][a-zA-Z']+){1,5})\b(?!\s+(?:Street|Avenue|Road|Boulevard|St\.|Ave\.|Rd\.|Blvd\.))/g
   ];
   
-  // Create React elements for the rest of the text with business names hyperlinked
-  const processedTextParts: React.ReactNode[] = [];
-  let currentTextIndex = 0;
-  let matchFound = false;
-  
-  const processedText = restOfText;
-  
-  // Function to check if a position is within a range already processed
-  const isPositionProcessed = (position: number, processedRanges: {start: number, end: number}[]): boolean => {
-    return processedRanges.some(range => position >= range.start && position < range.end);
-  };
-  
-  // Keep track of which parts of the text have been processed to avoid overlapping matches
-  const processedRanges: {start: number, end: number}[] = [];
-  
-  // Process the text with each business pattern
+  // Find all business names in the text
+  let businessNames: {name: string, index: number}[] = [];
   for (const pattern of businessPatterns) {
     let match;
-    // Reset the pattern's lastIndex property before each exec call
     pattern.lastIndex = 0;
     
-    while ((match = pattern.exec(processedText)) !== null) {
-      const businessName = match[0];
-      const matchStartIndex = match.index;
-      const matchEndIndex = matchStartIndex + businessName.length;
-      
-      // Skip if this range has already been processed
-      if (isPositionProcessed(matchStartIndex, processedRanges)) {
-        continue;
-      }
-      
-      // Add text before the match
-      if (matchStartIndex > currentTextIndex) {
-        processedTextParts.push(processedText.substring(currentTextIndex, matchStartIndex));
-      }
-      
-      // Add the business name as a hyperlink
-      processedTextParts.push(
-        React.createElement(
-          'a',
-          {
-            key: `business-${matchStartIndex}`,
-            href: getLocationUrl(businessName),
-            target: "_blank",
-            rel: "noopener noreferrer",
-            className: "text-primary hover:underline"
-          },
-          businessName
-        )
-      );
-      
-      // Update current index and mark this range as processed
-      currentTextIndex = matchEndIndex;
-      processedRanges.push({start: matchStartIndex, end: matchEndIndex});
-      matchFound = true;
+    while ((match = pattern.exec(restOfText)) !== null) {
+      businessNames.push({
+        name: match[0],
+        index: match.index
+      });
     }
   }
   
-  // Add any remaining text
-  if (currentTextIndex < processedText.length) {
-    processedTextParts.push(processedText.substring(currentTextIndex));
-  }
+  // Sort business names by their position in the text
+  businessNames.sort((a, b) => a.index - b.index);
   
-  // If no business names were found, just return the text as is
-  if (!matchFound) {
-    processedTextParts.push(processedText);
-  }
+  // Create business name h2 elements with hyperlinks
+  const businessNameLinks: React.ReactNode[] = businessNames.map((business, index) => 
+    React.createElement(
+      'h2',
+      { 
+        key: `business-name-${index}`,
+        className: "text-lg font-medium mt-3 mb-2" 
+      },
+      React.createElement(
+        'a',
+        {
+          href: getLocationUrl(business.name),
+          target: "_blank",
+          rel: "noopener noreferrer",
+          className: "text-primary hover:underline"
+        },
+        business.name
+      )
+    )
+  );
   
+  // Add the regular text without business names as hyperlinks
   return React.createElement(
     React.Fragment,
     null,
     titleWithLink,
-    React.createElement('div', {className: "text-base"}, ...processedTextParts)
+    businessNameLinks.length > 0 ? businessNameLinks : null,
+    React.createElement('div', {className: "text-base mt-3"}, restOfText)
   );
 };
