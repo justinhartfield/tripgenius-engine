@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { formatActivityText, addHyperlinksToActivityText } from '@/utils/activity';
 
 interface ActivityGuideDescriptionProps {
@@ -14,11 +14,27 @@ export const ActivityGuideDescription: React.FC<ActivityGuideDescriptionProps> =
   interestType
 }) => {
   const formattedActivity = formatActivityText(activity);
+  const [processedContent, setProcessedContent] = useState<React.ReactNode | null>(null);
+  
+  useEffect(() => {
+    const getDescription = async () => {
+      try {
+        const guideText = generateGuideSpecificDescription();
+        const content = await addHyperlinksToActivityText(guideText);
+        setProcessedContent(content);
+      } catch (error) {
+        console.error('Error processing description:', error);
+        setProcessedContent(<div>{formattedActivity}</div>);
+      }
+    };
+    
+    getDescription();
+  }, [formattedActivity, tourGuideType, interestType]);
   
   // Generate guide-specific description if no detailed description exists
-  const getGuideSpecificDescription = () => {
+  const generateGuideSpecificDescription = () => {
     if (formattedActivity.split('\n').length > 1) {
-      return addHyperlinksToActivityText(formattedActivity); // Use hyperlinked version for detailed descriptions
+      return formattedActivity; // Use the detailed description as is
     }
     
     const activityName = formattedActivity.split('\n')[0];
@@ -155,12 +171,12 @@ export const ActivityGuideDescription: React.FC<ActivityGuideDescriptionProps> =
         break;
     }
     
-    return addHyperlinksToActivityText(guideText);
+    return guideText;
   };
 
   return (
     <div className="itinerary-detail-text mt-2">
-      {getGuideSpecificDescription()}
+      {processedContent || <div>Loading description...</div>}
     </div>
   );
 };

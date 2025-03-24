@@ -30,20 +30,24 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
     : undefined;
   
   const [processedContent, setProcessedContent] = useState<React.ReactNode | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
   
   useEffect(() => {
-    const processHyperlinks = async () => {
-      try {
-        const content = await addHyperlinksToActivityText(formattedActivity);
-        setProcessedContent(content);
-      } catch (error) {
-        console.error('Error processing hyperlinks:', error);
-        setProcessedContent(formattedActivity);
-      }
-    };
-    
-    processHyperlinks();
-  }, [formattedActivity]);
+    // Only process hyperlinks if the accordion is expanded to save resources
+    if (isExpanded) {
+      const processHyperlinks = async () => {
+        try {
+          const content = await addHyperlinksToActivityText(formattedActivity);
+          setProcessedContent(content);
+        } catch (error) {
+          console.error('Error processing hyperlinks:', error);
+          setProcessedContent(<div>{formattedActivity}</div>);
+        }
+      };
+      
+      processHyperlinks();
+    }
+  }, [formattedActivity, isExpanded]);
 
   return (
     <div 
@@ -51,7 +55,12 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
       style={{ animationDelay: `${animationDelay}s` }}
     >
       <div className="flex items-start gap-3">
-        <Accordion type="single" collapsible className="w-full">
+        <Accordion 
+          type="single" 
+          collapsible 
+          className="w-full"
+          onValueChange={(value) => setIsExpanded(!!value)}
+        >
           <AccordionItem value="item-1" className={`itinerary-activity-card ${getTimeOfDayColor(time)}`}>
             <div className="flex p-4">
               <ActivityThumbnail thumbnail={thumbnail} alt={activityTitle} />
@@ -69,8 +78,14 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
             </AccordionTrigger>
             
             <AccordionContent className="px-4 pb-4 text-base">
-              {processedContent ? (
-                <div className="activity-details">{processedContent}</div>
+              {isExpanded ? (
+                processedContent ? (
+                  <div className="activity-details">{processedContent}</div>
+                ) : (
+                  <div className="flex items-center justify-center py-4">
+                    <div className="animate-pulse text-gray-400">Loading details...</div>
+                  </div>
+                )
               ) : (
                 <ActivityGuideDescription 
                   activity={formattedActivity}
