@@ -10,7 +10,7 @@ import { ActivityThumbnail } from './ActivityThumbnail';
 import { ActivityCardHeader } from './ActivityCardHeader';
 import { ActivityGuideDescription } from './ActivityGuideDescription';
 import { PreviewActivityProps } from './activityTypes';
-import { formatActivityText, getTimeOfDayColor } from '@/utils/activityUtils';
+import { formatActivityText, getTimeOfDayColor, addHyperlinksToActivityText } from '@/utils/activityUtils';
 
 export const PreviewActivity: React.FC<PreviewActivityProps> = ({
   time,
@@ -23,9 +23,10 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
   tourGuideType = 'rick-steves'
 }) => {
   const formattedActivity = formatActivityText(activity);
-  const activityTitle = formattedActivity.split('\n')[0];
-  const activityDescription = formattedActivity.split('\n').length > 1 
-    ? formattedActivity.split('\n').slice(1).join(' ').trim() 
+  const activityLines = formattedActivity.split('\n');
+  const activityTitle = activityLines[0];
+  const activityDescription = activityLines.length > 1 
+    ? activityLines.slice(1).join(' ').trim() 
     : undefined;
 
   return (
