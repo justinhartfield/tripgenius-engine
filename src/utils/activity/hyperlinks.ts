@@ -101,14 +101,22 @@ const extractBusinessNames = (text: string): string[] => {
       /\b(Marriott|Hilton|Hyatt|Sheraton|McDonald's|Starbucks|Subway|Burger King)(\s+[A-Za-z\s'&-]{2,30})?\b/g,
       
       // Proper nouns that are likely business names
-      /\b(The\s+)?([A-Z][a-zA-Z']+(\s+[A-Z][a-zA-Z']+){1,5})\b(?!\s+(?:Street|Avenue|Road|Boulevard|St\.|Ave\.|Rd\.|Blvd\.))/g
+      /\b(The\s+)?([A-Z][a-zA-Z']+(\s+[A-Z][a-zA-Z']+){1,5})\b(?!\s+(?:Street|Avenue|Road|Boulevard|St\.|Ave\.|Rd\.|Blvd\.))/g,
+      
+      // Custom additions for specific business types
+      /\b(Bosscat Kitchen|University of California)\b/g
     ];
     
     for (const pattern of businessPatterns) {
       pattern.lastIndex = 0;
       
       while ((match = pattern.exec(text)) !== null) {
-        businessNames.push(match[0]);
+        // Extract just the business name from the match
+        let businessName = match[0];
+        // Add the full match to our business names
+        if (!businessNames.includes(businessName)) {
+          businessNames.push(businessName);
+        }
       }
     }
   }
@@ -133,53 +141,61 @@ export const addHyperlinksToActivityText = (text: string): React.ReactNode => {
   const urls = extractUrls(titleLine);
   titleLine = removeBrackets(removeUrls(titleLine)).trim();
   
-  // Create a title element
-  const titleWithLink = React.createElement(
+  // Clean description text - remove URLs and bracketed business names
+  const cleanedText = removeBrackets(removeUrls(restOfText)).trim();
+  
+  // Create a title element with the main activity title
+  const titleElement = React.createElement(
     'div',
     { className: "font-semibold text-primary mb-2" },
     titleLine
   );
-
-  // If no description, just return the title
-  if (!restOfText) return titleWithLink;
   
-  // Extract business names from the title or rest of text
-  const businessNames = extractBusinessNames(titleLine).length > 0 
-    ? extractBusinessNames(titleLine) 
-    : extractBusinessNames(restOfText);
+  // Extract business names from the title and rest of text
+  // First check the title for the main business name
+  const titleBusinessNames = extractBusinessNames(titleLine);
   
-  // Clean description text - remove URLs and bracketed business names
-  const cleanedText = removeBrackets(removeUrls(restOfText)).trim();
+  // Only use business names from the description if we didn't find any in the title
+  const allBusinessNames = titleBusinessNames.length > 0 
+    ? titleBusinessNames 
+    : extractBusinessNames(cleanedText);
   
-  // Create business name elements with hyperlinks
-  const businessNameLinks: React.ReactNode[] = businessNames.map((business, index) => {
-    const url = urls.length > 0 ? urls[0] : getLocationUrl(business);
-    
-    return React.createElement(
-      'h2',
-      { 
-        key: `business-name-${index}`,
-        className: "text-lg font-medium text-primary" 
-      },
-      React.createElement(
-        'a',
-        {
-          href: url,
-          target: "_blank",
-          rel: "noopener noreferrer",
-          className: "hover:underline"
-        },
-        business
-      )
-    );
-  });
+  // Create business name elements with hyperlinks (if any were found)
+  const businessNameLinks = allBusinessNames.length > 0 
+    ? allBusinessNames.map((business, index) => {
+        const url = urls.length > 0 ? urls[0] : getLocationUrl(business);
+        
+        return React.createElement(
+          'h2',
+          { 
+            key: `business-name-${index}`,
+            className: "text-lg font-medium text-primary mb-3" 
+          },
+          React.createElement(
+            'a',
+            {
+              href: url,
+              target: "_blank",
+              rel: "noopener noreferrer",
+              className: "hover:underline"
+            },
+            business
+          )
+        );
+      })
+    : [];
   
-  // Add the regular text without business names as hyperlinks
+  // Only include the first business name to avoid repetition
+  const uniqueBusinessLinks = businessNameLinks.length > 0 
+    ? [businessNameLinks[0]] 
+    : [];
+  
+  // Add the regular text without business names
   return React.createElement(
     React.Fragment,
     null,
-    titleWithLink,
-    businessNameLinks.length > 0 ? businessNameLinks : null,
-    React.createElement('div', {className: "text-base mt-3"}, cleanedText)
+    titleElement,
+    uniqueBusinessLinks,
+    React.createElement('div', {className: "text-base mt-1"}, cleanedText)
   );
 };
