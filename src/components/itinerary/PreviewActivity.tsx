@@ -1,8 +1,7 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { 
-  Coffee, Utensils, Camera, Map, Clock, 
-  ChevronDown, ChevronUp
+  Coffee, Utensils, Camera, Map, Brush, Waves, Ticket, TreePine, Wine, Mountain 
 } from 'lucide-react';
 import { 
   Accordion,
@@ -56,6 +55,12 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
       case 'Utensils': return <Utensils className="h-5 w-5" />;
       case 'Map': return <Map className="h-5 w-5" />;
       case 'Camera': return <Camera className="h-5 w-5" />;
+      case 'Mountain': return <Mountain className="h-5 w-5" />;
+      case 'TreePine': return <TreePine className="h-5 w-5" />;
+      case 'Brush': return <Brush className="h-5 w-5" />;
+      case 'Waves': return <Waves className="h-5 w-5" />;
+      case 'Ticket': return <Ticket className="h-5 w-5" />;
+      case 'Wine': return <Wine className="h-5 w-5" />;
       default: return <Coffee className="h-5 w-5" />;
     }
   };
@@ -101,12 +106,13 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
     return 'bg-gray-100 border-gray-200';
   };
 
-  // Get color based on activity type with better contrast
+  // Get bubble color based on time of day
   const getBubbleColor = () => {
     // Time-based color takes precedence over interest-based color
     return getTimeOfDayColor();
   };
 
+  // Get tag color based on interest type
   const getTagColor = () => {
     switch (interest.toLowerCase()) {
       case 'food': return 'bg-orange-500/20 text-orange-700';
@@ -202,18 +208,36 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
     }
   };
 
+  // Format the time display to eliminate duplicates and numbers
+  const formatTimeDisplay = () => {
+    // Remove any standalone numbers
+    if (/^\d+$/.test(time.trim())) {
+      return "";
+    }
+    
+    // If the time includes the time of day word (morning, afternoon, evening),
+    // don't display it as it's redundant with the section heading
+    const timeOfDay = getTimeOfDayLabel();
+    if (time.toLowerCase().includes(timeOfDay.toLowerCase())) {
+      return "";
+    }
+    
+    return time;
+  };
+
+  const displayTime = formatTimeDisplay();
+
   return (
     <div 
       className="animate-fade-in mb-6" 
       style={{ animationDelay: `${animationDelay}s` }}
     >
       <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 w-12 text-center">
-          <span className="itinerary-time-label">{time}</span>
-          <div className="text-xs font-medium mt-1 rounded-full px-2 py-0.5 text-center bg-opacity-50">
-            {getTimeOfDayLabel()}
+        {displayTime && (
+          <div className="flex-shrink-0 w-12 text-center">
+            <span className="itinerary-time-label">{displayTime}</span>
           </div>
-        </div>
+        )}
         
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="item-1" className={`itinerary-activity-card ${getBubbleColor()}`}>

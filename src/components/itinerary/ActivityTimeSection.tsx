@@ -19,9 +19,11 @@ export const ActivityTimeSection: React.FC<ActivitySectionProps> = ({
   
   return (
     <div className="mb-4">
-      <div className="flex items-center mb-2">
-        {icon}
-        <h4 className={`text-sm font-semibold ${titleColor}`}>{title}</h4>
+      <div className="flex items-center mb-3">
+        <div className="flex items-center">
+          {icon}
+          <h4 className={`text-sm font-semibold ${titleColor} ml-2`}>{title}</h4>
+        </div>
       </div>
       <div className={`pl-2 border-l-2 ${borderColor}`}>
         {activities.map((activity, actIndex) => (
