@@ -2,6 +2,42 @@
 import React from 'react';
 
 /**
+ * Try to generate a direct URL for a location name if possible,
+ * otherwise fall back to a Google search
+ */
+const getLocationUrl = (locationName: string): string => {
+  // Clean up the location name for URL construction
+  const cleanName = locationName.trim().toLowerCase();
+  
+  // Check if the location name already contains a valid URL
+  if (cleanName.startsWith('http://') || cleanName.startsWith('https://')) {
+    return cleanName;
+  }
+  
+  // For known businesses, try to construct a direct URL
+  // This is a simple implementation that could be expanded
+  if (cleanName.includes('marriott') || cleanName.includes('hilton') || 
+      cleanName.includes('hyatt') || cleanName.includes('sheraton')) {
+    const brand = cleanName.includes('marriott') ? 'marriott' : 
+                 cleanName.includes('hilton') ? 'hilton' : 
+                 cleanName.includes('hyatt') ? 'hyatt' : 'sheraton';
+    return `https://www.${brand}.com/`;
+  }
+  
+  // If it's a restaurant with a chain name
+  if (cleanName.includes('mcdonalds') || cleanName.includes('starbucks') || 
+      cleanName.includes('subway') || cleanName.includes('burger king')) {
+    const chain = cleanName.includes('mcdonalds') ? 'mcdonalds' : 
+                  cleanName.includes('starbucks') ? 'starbucks' : 
+                  cleanName.includes('subway') ? 'subway' : 'burgerking';
+    return `https://www.${chain}.com/`;
+  }
+  
+  // Default to Google search for all other locations
+  return `https://www.google.com/search?q=${encodeURIComponent(locationName)}`;
+};
+
+/**
  * Adds hyperlinks to venue names in activity text
  * Detects names of hotels, restaurants, places, etc.
  */
@@ -22,7 +58,7 @@ export const addHyperlinksToActivityText = (text: string): React.ReactNode => {
     React.createElement(
       'a',
       {
-        href: `https://www.google.com/search?q=${encodeURIComponent(titleLine)}`,
+        href: getLocationUrl(titleLine),
         target: "_blank",
         rel: "noopener noreferrer",
         className: "font-semibold text-primary hover:underline"
@@ -66,7 +102,7 @@ export const addHyperlinksToActivityText = (text: string): React.ReactNode => {
             'a',
             {
               key: `venue-${match.index}`,
-              href: `https://www.google.com/search?q=${encodeURIComponent(venueName)}`,
+              href: getLocationUrl(venueName),
               target: "_blank",
               rel: "noopener noreferrer",
               className: "text-primary hover:underline"
