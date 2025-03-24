@@ -1,6 +1,9 @@
+
 /**
  * Detects the type of activity based on the activity name
  */
+import { extractBusinessNames } from './businessExtractor';
+
 export const detectActivityType = (activityName: string): string => {
   const activityNameLower = activityName.toLowerCase();
   
