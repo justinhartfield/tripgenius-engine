@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 /**
@@ -17,7 +16,8 @@ const getLocationUrl = (locationName: string): string => {
   // For known businesses, try to construct a direct URL
   // This is a simple implementation that could be expanded
   if (cleanName.includes('marriott') || cleanName.includes('hilton') || 
-      cleanName.includes('hyatt') || cleanName.includes('sheraton')) {
+      cleanName.includes('hyatt') || 
+      cleanName.includes('sheraton')) {
     const brand = cleanName.includes('marriott') ? 'marriott' : 
                  cleanName.includes('hilton') ? 'hilton' : 
                  cleanName.includes('hyatt') ? 'hyatt' : 'sheraton';
@@ -38,8 +38,7 @@ const getLocationUrl = (locationName: string): string => {
 };
 
 /**
- * Adds hyperlinks to venue names in activity text
- * Detects names of hotels, restaurants, places, etc.
+ * Extract business names from text to create targeted hyperlinks
  */
 export const addHyperlinksToActivityText = (text: string): React.ReactNode => {
   // Split the text into lines to process the title separately
@@ -53,15 +52,15 @@ export const addHyperlinksToActivityText = (text: string): React.ReactNode => {
   
   // Create a hyperlink for the venue name in the title
   const titleWithLink = React.createElement(
-    React.Fragment,
-    null,
+    'div',
+    { className: "font-semibold text-primary mb-2" },
     React.createElement(
       'a',
       {
         href: getLocationUrl(titleLine),
         target: "_blank",
         rel: "noopener noreferrer",
-        className: "font-semibold text-primary hover:underline"
+        className: "hover:underline"
       },
       titleLine
     )
@@ -70,70 +69,93 @@ export const addHyperlinksToActivityText = (text: string): React.ReactNode => {
   // Process the rest of the text to find potential venue references
   if (!restOfText) return titleWithLink;
   
-  // Common venue prefixes that might indicate a place name
-  const venuePrefixes = [
-    'Hotel', 'Restaurant', 'Café', 'Cafe', 'Museum', 'Park', 'Garden', 
-    'Temple', 'Church', 'Castle', 'Palace', 'Bar', 'Pub', 'Club', 'Gallery', 
-    'Theater', 'Theatre', 'Beach', 'Mountain', 'Lake', 'River', 'Market', 
-    'Shop', 'Mall', 'Center', 'Centre', 'Square', 'Plaza', 'Avenue', 'Street'
+  // Business name patterns
+  const businessPatterns = [
+    // Common business prefixes followed by names (e.g., "Hotel Ritz", "Restaurant Epicure")
+    /\b(Hotel|Restaurant|Café|Cafe|Museum|Theater|Theatre|Gallery|Bar|Pub|Club)\s+([A-Z][a-zA-Z\s'&-]{2,30})\b/g,
+    
+    // Business names with common suffixes (e.g., "Ritz Hotel", "Louvre Museum")
+    /\b([A-Z][a-zA-Z\s'&-]{2,30})\s+(Hotel|Restaurant|Café|Cafe|Museum|Theater|Theatre|Gallery|Bar|Pub|Club)\b/g,
+    
+    // Well-known chain names
+    /\b(Marriott|Hilton|Hyatt|Sheraton|McDonald's|Starbucks|Subway|Burger King)(\s+[A-Za-z\s'&-]{2,30})?\b/g,
+    
+    // Proper nouns that are likely business names
+    /\b(The\s+)?([A-Z][a-zA-Z']+(\s+[A-Z][a-zA-Z']+){1,5})\b(?!\s+(?:Street|Avenue|Road|Boulevard|St\.|Ave\.|Rd\.|Blvd\.))/g
   ];
   
-  // Function to convert found venue names to links
-  const processTextSegment = (segment: string): React.ReactNode[] => {
-    const parts: React.ReactNode[] = [];
-    let remainingText = segment;
-    
-    // Look for venue names with common prefixes
-    for (const prefix of venuePrefixes) {
-      const regex = new RegExp(`(${prefix}\\s[A-Z][\\w\\s'&-]{2,30})`, 'g');
-      let match;
-      let lastIndex = 0;
-      
-      while ((match = regex.exec(remainingText)) !== null) {
-        const venueName = match[1];
-        const beforeVenue = remainingText.substring(lastIndex, match.index);
-        
-        if (beforeVenue) {
-          parts.push(beforeVenue);
-        }
-        
-        parts.push(
-          React.createElement(
-            'a',
-            {
-              key: `venue-${match.index}`,
-              href: getLocationUrl(venueName),
-              target: "_blank",
-              rel: "noopener noreferrer",
-              className: "text-primary hover:underline"
-            },
-            venueName
-          )
-        );
-        
-        lastIndex = match.index + venueName.length;
-      }
-      
-      if (lastIndex > 0) {
-        remainingText = remainingText.substring(lastIndex);
-      }
-    }
-    
-    // Add any remaining text
-    if (remainingText) {
-      parts.push(remainingText);
-    }
-    
-    return parts;
+  // Create React elements for the rest of the text with business names hyperlinked
+  const processedTextParts: React.ReactNode[] = [];
+  let currentTextIndex = 0;
+  let matchFound = false;
+  
+  const processedText = restOfText;
+  
+  // Function to check if a position is within a range already processed
+  const isPositionProcessed = (position: number, processedRanges: {start: number, end: number}[]): boolean => {
+    return processedRanges.some(range => position >= range.start && position < range.end);
   };
   
-  const processedText = processTextSegment(restOfText);
+  // Keep track of which parts of the text have been processed to avoid overlapping matches
+  const processedRanges: {start: number, end: number}[] = [];
+  
+  // Process the text with each business pattern
+  for (const pattern of businessPatterns) {
+    let match;
+    // Reset the pattern's lastIndex property before each exec call
+    pattern.lastIndex = 0;
+    
+    while ((match = pattern.exec(processedText)) !== null) {
+      const businessName = match[0];
+      const matchStartIndex = match.index;
+      const matchEndIndex = matchStartIndex + businessName.length;
+      
+      // Skip if this range has already been processed
+      if (isPositionProcessed(matchStartIndex, processedRanges)) {
+        continue;
+      }
+      
+      // Add text before the match
+      if (matchStartIndex > currentTextIndex) {
+        processedTextParts.push(processedText.substring(currentTextIndex, matchStartIndex));
+      }
+      
+      // Add the business name as a hyperlink
+      processedTextParts.push(
+        React.createElement(
+          'a',
+          {
+            key: `business-${matchStartIndex}`,
+            href: getLocationUrl(businessName),
+            target: "_blank",
+            rel: "noopener noreferrer",
+            className: "text-primary hover:underline"
+          },
+          businessName
+        )
+      );
+      
+      // Update current index and mark this range as processed
+      currentTextIndex = matchEndIndex;
+      processedRanges.push({start: matchStartIndex, end: matchEndIndex});
+      matchFound = true;
+    }
+  }
+  
+  // Add any remaining text
+  if (currentTextIndex < processedText.length) {
+    processedTextParts.push(processedText.substring(currentTextIndex));
+  }
+  
+  // If no business names were found, just return the text as is
+  if (!matchFound) {
+    processedTextParts.push(processedText);
+  }
   
   return React.createElement(
     React.Fragment,
     null,
     titleWithLink,
-    React.createElement('br', null),
-    ...processedText
+    React.createElement('div', {className: "text-base"}, ...processedTextParts)
   );
 };
