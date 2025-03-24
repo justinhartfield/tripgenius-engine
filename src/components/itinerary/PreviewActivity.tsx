@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Accordion,
   AccordionContent,
@@ -28,6 +28,22 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
   const activityDescription = activityLines.length > 1 
     ? activityLines.slice(1).join(' ').trim() 
     : undefined;
+  
+  const [processedContent, setProcessedContent] = useState<React.ReactNode | null>(null);
+  
+  useEffect(() => {
+    const processHyperlinks = async () => {
+      try {
+        const content = await addHyperlinksToActivityText(formattedActivity);
+        setProcessedContent(content);
+      } catch (error) {
+        console.error('Error processing hyperlinks:', error);
+        setProcessedContent(formattedActivity);
+      }
+    };
+    
+    processHyperlinks();
+  }, [formattedActivity]);
 
   return (
     <div 
@@ -53,11 +69,15 @@ export const PreviewActivity: React.FC<PreviewActivityProps> = ({
             </AccordionTrigger>
             
             <AccordionContent className="px-4 pb-4 text-base">
-              <ActivityGuideDescription 
-                activity={formattedActivity}
-                tourGuideType={tourGuideType}
-                interestType={interest}
-              />
+              {processedContent ? (
+                <div className="activity-details">{processedContent}</div>
+              ) : (
+                <ActivityGuideDescription 
+                  activity={formattedActivity}
+                  tourGuideType={tourGuideType}
+                  interestType={interest}
+                />
+              )}
             </AccordionContent>
           </AccordionItem>
         </Accordion>

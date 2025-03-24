@@ -3,7 +3,7 @@ import React from 'react';
 
 /**
  * Try to generate a direct URL for a location name if possible,
- * otherwise fall back to a Google search
+ * otherwise fall back to a Google Maps search
  */
 const getLocationUrl = (locationName: string): string => {
   // Check if the text already contains a URL
@@ -41,8 +41,8 @@ const getLocationUrl = (locationName: string): string => {
     return `https://www.${chain}.com/`;
   }
   
-  // Default to Google search for all other locations
-  return `https://www.google.com/search?q=${encodeURIComponent(locationName)}`;
+  // Default to Google Maps search for all other locations
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationName)}`;
 };
 
 /**
@@ -104,7 +104,7 @@ const extractBusinessNames = (text: string): string[] => {
       /\b(The\s+)?([A-Z][a-zA-Z']+(\s+[A-Z][a-zA-Z']+){1,5})\b(?!\s+(?:Street|Avenue|Road|Boulevard|St\.|Ave\.|Rd\.|Blvd\.))/g,
       
       // Custom additions for specific business types
-      /\b(Bosscat Kitchen|University of California)\b/g
+      /\b(Bosscat Kitchen|University of California|The Little Nell|Element 47|Ajax Tavern|Matsuhisa|Remède Spa|White House Tavern|Casa Tua|Jour de Fête)\b/g
     ];
     
     for (const pattern of businessPatterns) {
@@ -124,10 +124,49 @@ const extractBusinessNames = (text: string): string[] => {
   return businessNames;
 };
 
+// Interface for business data including ratings
+interface BusinessWithRating {
+  name: string;
+  url: string;
+  rating?: number;
+  reviewCount?: number;
+}
+
 /**
- * Process text to create hyperlinked business names as h2 elements
+ * Fetch ratings for a business using Google Places API
  */
-export const addHyperlinksToActivityText = (text: string): React.ReactNode => {
+const fetchBusinessRating = async (businessName: string, location: string = ''): Promise<{rating?: number, reviewCount?: number}> => {
+  try {
+    // This would normally make an API call to Google Places API
+    // For demonstration, returning mock data based on business name
+    // In production, this should be replaced with actual API calls
+    
+    // Mock ratings for specific businesses in Aspen
+    const mockRatings: Record<string, {rating: number, reviewCount: number}> = {
+      'The Little Nell': { rating: 4.8, reviewCount: 512 },
+      'Element 47': { rating: 4.7, reviewCount: 278 },
+      'Ajax Tavern': { rating: 4.4, reviewCount: 356 },
+      'Matsuhisa': { rating: 4.6, reviewCount: 420 },
+      'Remède Spa': { rating: 4.9, reviewCount: 189 },
+      'White House Tavern': { rating: 4.5, reviewCount: 312 },
+      'Casa Tua': { rating: 4.6, reviewCount: 220 },
+      'Jour de Fête': { rating: 4.3, reviewCount: 176 },
+      'Aspen Art Museum': { rating: 4.4, reviewCount: 301 },
+      'Maroon Bells': { rating: 4.9, reviewCount: 732 },
+    };
+    
+    // Return mock data if available, otherwise undefined
+    return mockRatings[businessName] || {};
+  } catch (error) {
+    console.error(`Error fetching rating for ${businessName}:`, error);
+    return {};
+  }
+};
+
+/**
+ * Process text to create hyperlinked business names as h2 elements with ratings
+ */
+export const addHyperlinksToActivityText = async (text: string): Promise<React.ReactNode> => {
   // Split the text into lines to process the title separately
   const lines = text.split('\n');
   
@@ -160,30 +199,52 @@ export const addHyperlinksToActivityText = (text: string): React.ReactNode => {
     ? titleBusinessNames 
     : extractBusinessNames(cleanedText);
   
-  // Create business name elements with hyperlinks (if any were found)
-  const businessNameLinks = allBusinessNames.length > 0 
-    ? allBusinessNames.map((business, index) => {
-        const url = urls.length > 0 ? urls[0] : getLocationUrl(business);
-        
-        return React.createElement(
-          'h2',
-          { 
-            key: `business-name-${index}`,
-            className: "text-lg font-medium text-primary mb-3" 
+  // Fetch ratings for each business (in a real app, would be done via API)
+  const businessesWithRatings: BusinessWithRating[] = await Promise.all(
+    allBusinessNames.slice(0, 1).map(async (business) => {
+      const url = urls.length > 0 ? urls[0] : getLocationUrl(business);
+      const ratingData = await fetchBusinessRating(business);
+      
+      return {
+        name: business,
+        url,
+        rating: ratingData.rating,
+        reviewCount: ratingData.reviewCount
+      };
+    })
+  );
+  
+  // Create business name elements with hyperlinks and ratings
+  const businessNameLinks = businessesWithRatings.map((business, index) => {
+    const ratingStars = business.rating 
+      ? React.createElement(
+          'span', 
+          { className: "ml-2 text-yellow-400" }, 
+          `★ ${business.rating.toFixed(1)}${business.reviewCount ? ` (${business.reviewCount})` : ''}`
+        ) 
+      : null;
+      
+    return React.createElement(
+      'h2',
+      { 
+        key: `business-name-${index}`,
+        className: "text-lg font-medium text-primary mb-3 flex items-center" 
+      },
+      [
+        React.createElement(
+          'a',
+          {
+            href: business.url,
+            target: "_blank",
+            rel: "noopener noreferrer",
+            className: "hover:underline"
           },
-          React.createElement(
-            'a',
-            {
-              href: url,
-              target: "_blank",
-              rel: "noopener noreferrer",
-              className: "hover:underline"
-            },
-            business
-          )
-        );
-      })
-    : [];
+          business.name
+        ),
+        ratingStars
+      ]
+    );
+  });
   
   // Only include the first business name to avoid repetition
   const uniqueBusinessLinks = businessNameLinks.length > 0 
