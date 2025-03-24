@@ -1,3 +1,4 @@
+
 import { Coffee, Utensils, Camera, Map, Brush, Waves, Ticket, TreePine, Wine, Mountain } from 'lucide-react';
 import React from 'react';
 
@@ -18,6 +19,38 @@ export const formatActivityText = (text: string): string => {
     .replace(/\n##\s?/g, '\n')
     .replace(/\n#\s?/g, '\n')
     .replace(/\|\n\|/g, '\n');
+};
+
+/**
+ * Converts plain text location names to hyperlinks
+ */
+export const addHyperlinksToActivityText = (text: string): string => {
+  if (!text) return '';
+  
+  // Pattern to match names of establishments with various formats
+  // This regex looks for patterns like "Name of Place", "The Name", "Place Name Restaurant", etc.
+  const patterns = [
+    // Match quoted venue names
+    /"([^"]+)"/g,
+    // Match venue names followed by common venue types
+    /([A-Z][A-Za-z0-9\s]{2,})\s(Hotel|Restaurant|Café|Bistro|Museum|Gallery|Park|Garden|Castle|Palace|Cathedral|Church)/g,
+    // Match venue types followed by name
+    /(Hotel|Restaurant|Café|Bistro|Museum|Gallery|Park|Garden|Castle|Palace|Cathedral|Church)\s([A-Z][A-Za-z0-9\s]{2,})/g,
+    // Match "The" followed by a name
+    /The\s([A-Z][A-Za-z0-9\s]{2,})/g
+  ];
+  
+  let processedText = text;
+  
+  patterns.forEach(pattern => {
+    processedText = processedText.replace(pattern, (match, p1, p2) => {
+      const venueName = p2 ? `${p1} ${p2}` : p1;
+      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(venueName)}`;
+      return `<a href="${searchUrl}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">${match}</a>`;
+    });
+  });
+  
+  return processedText;
 };
 
 /**
