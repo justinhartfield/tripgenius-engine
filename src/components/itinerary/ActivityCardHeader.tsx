@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { formatTimeDisplay, getIconComponent, getTagColor, getIconBgColor } from '@/utils/activityUtils';
+import { formatTimeDisplay, getIconComponent, getTagColor, getIconBgColor } from '@/utils/activity';
 
 interface ActivityCardHeaderProps {
   time: string;

@@ -10,7 +10,7 @@ import { ActivityThumbnail } from './ActivityThumbnail';
 import { ActivityCardHeader } from './ActivityCardHeader';
 import { ActivityGuideDescription } from './ActivityGuideDescription';
 import { PreviewActivityProps } from './activityTypes';
-import { formatActivityText, getTimeOfDayColor, addHyperlinksToActivityText } from '@/utils/activityUtils';
+import { formatActivityText, getTimeOfDayColor, addHyperlinksToActivityText } from '@/utils/activity';
 
 export const PreviewActivity: React.FC<PreviewActivityProps> = ({
   time,

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { formatActivityText, addHyperlinksToActivityText } from '@/utils/activityUtils';
+import { formatActivityText, addHyperlinksToActivityText } from '@/utils/activity';
 
 interface ActivityGuideDescriptionProps {
   activity: string;
