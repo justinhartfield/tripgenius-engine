@@ -36,17 +36,19 @@ export const addHyperlinksToActivityText = (text: string): React.ReactNode => {
   const restOfText = lines.slice(1).join('\n');
   
   // Create a hyperlink for the venue name in the title
-  const titleWithLink = (
-    <React.Fragment>
-      <a 
-        href={`https://www.google.com/search?q=${encodeURIComponent(titleLine)}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="font-semibold text-primary hover:underline"
-      >
-        {titleLine}
-      </a>
-    </React.Fragment>
+  const titleWithLink = React.createElement(
+    React.Fragment,
+    null,
+    React.createElement(
+      'a',
+      {
+        href: `https://www.google.com/search?q=${encodeURIComponent(titleLine)}`,
+        target: "_blank",
+        rel: "noopener noreferrer",
+        className: "font-semibold text-primary hover:underline"
+      },
+      titleLine
+    )
   );
   
   // Process the rest of the text to find potential venue references
@@ -80,15 +82,17 @@ export const addHyperlinksToActivityText = (text: string): React.ReactNode => {
         }
         
         parts.push(
-          <a 
-            key={`venue-${match.index}`}
-            href={`https://www.google.com/search?q=${encodeURIComponent(venueName)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary hover:underline"
-          >
-            {venueName}
-          </a>
+          React.createElement(
+            'a',
+            {
+              key: `venue-${match.index}`,
+              href: `https://www.google.com/search?q=${encodeURIComponent(venueName)}`,
+              target: "_blank",
+              rel: "noopener noreferrer",
+              className: "text-primary hover:underline"
+            },
+            venueName
+          )
         );
         
         lastIndex = match.index + venueName.length;
@@ -109,12 +113,12 @@ export const addHyperlinksToActivityText = (text: string): React.ReactNode => {
   
   const processedText = processTextSegment(restOfText);
   
-  return (
-    <React.Fragment>
-      {titleWithLink}
-      <br />
-      {processedText}
-    </React.Fragment>
+  return React.createElement(
+    React.Fragment,
+    null,
+    titleWithLink,
+    React.createElement('br', null),
+    ...processedText
   );
 };
 
