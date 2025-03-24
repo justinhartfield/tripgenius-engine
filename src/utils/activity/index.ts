@@ -8,3 +8,4 @@ export * from './ratingService';
 export * from './icons';
 export * from './colors';
 export * from './timeDisplay';
+export * from './activityTypeDetector';
