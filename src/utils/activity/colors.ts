@@ -58,6 +58,9 @@ export const getTagColor = (interest: string): string => {
   }
 };
 
+// Import the getTimeOfDayLabel function from timeDisplay.ts
+import { getTimeOfDayLabel } from './timeDisplay';
+
 /**
  * Get icon background color based on time of day
  */
